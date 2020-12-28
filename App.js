@@ -2,9 +2,11 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, Component } from 'react';
 import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Image} from 'react-native';
 
+//from my code
+import BidUI from './BidUI'
+
 //from other stuff
 import {randomColor} from 'randomcolor'
-
 
 
 //import gql from 'graphql-tag';
@@ -337,6 +339,8 @@ function App() {
   );
 }
 
+
+//tomdo: change
 export default App //withAuthenticator(App, true);
 
 
