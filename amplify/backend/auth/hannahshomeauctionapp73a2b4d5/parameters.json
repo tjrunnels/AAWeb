@@ -1,6 +1,6 @@
 {
     "identityPoolName": "hannahshomeauctionapp73a2b4d5_identitypool_73a2b4d5",
-    "allowUnauthenticatedIdentities": false,
+    "allowUnauthenticatedIdentities": true,
     "resourceNameTruncated": "hannah73a2b4d5",
     "userPoolName": "hannahshomeauctionapp73a2b4d5_userpool_73a2b4d5",
     "autoVerifiedAttributes": [

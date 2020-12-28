@@ -1,7 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState }  from 'react';
-import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity} from 'react-native';
+import React, { useEffect, useState, Component } from 'react';
+import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Image} from 'react-native';
 
+//from other stuff
+import {randomColor} from 'randomcolor'
 
 
 
@@ -18,7 +20,8 @@ import Amplify from 'aws-amplify'
 import AWSAppSyncClient, { AUTH_TYPE } from 'aws-appsync';
 import config from './aws-exports'
 Amplify.configure(config)
-import { withAuthenticator } from 'aws-amplify-react-native'; 
+import { withAuthenticator, S3Image } from 'aws-amplify-react-native'; 
+import { render } from 'react-dom';
 
 const signUpConfig = {
   hideAllDefaults: true,
@@ -59,10 +62,13 @@ async function listBids(setBids) {
   setBids(bids);
 }
 
+const initialState = { amount: 0, user: '' }
+
 function App() {
 
     const [bids, setBids] = useState([]);
     const [currentItem, setCurrentItem] = useState();
+    const [maxBid, setMaxBid] = useState(initialState)
     var displayedItems = [];
 
   useEffect(() => {
@@ -73,8 +79,10 @@ function App() {
         const bidSubscription = DataStore.observe(Bids).subscribe(msg => {
           listBids(setBids)
           //these are the only three opTypes: INSERT, UPDATE, and DELETE
-          if (msg.opType == 'INSERT')
+          if (msg.opType == 'INSERT') {
             console.log(msg.opType, "element:", msg.element);
+            //evaluateOneBid(msg.element)
+          }
             if (msg.opType == 'UPDATE')
             console.log("Updated: ", msg.element.id, " to: ", msg.element);
           else if (msg.opType == 'DELETE')
@@ -84,18 +92,81 @@ function App() {
         const itemSubscription = DataStore.observe(Item).subscribe(msg => {
           if (msg.opType == 'INSERT') {
             console.log("Just recieved new item:", msg.element.Title);
-            setCurrentItem(msg.element)
+            setCurrentItem(msg.element);
           }
         })
       }, [])
 
-  
+    //currentItem effect
+    useEffect(() => {
+      evaluateAllBids()
+    }, [currentItem])
 
+     //bids effect
+     useEffect(() => {
+      evaluateOneBid(bids[bids.length - 1])
+    }, [bids])
+
+  
+  function evaluateAllBids() {
+    if(currentItem != null) {
+      var id = currentItem.id
+      var thisBids = bids
+          .filter(function (bid) { 
+            if(currentItem != null) 
+              return bid.itemID == currentItem.id
+            else
+              return false
+          })
+      console.log("thisBids length: ", thisBids.length)
+
+      if(thisBids.length != 0) {
+        console.log("comparing...")
+        
+        var maxBid = 0
+        var maxBidUsername = ""
+        thisBids.forEach(element => {
+          if(element.Amount > maxBid) {
+            maxBid = element.Amount
+            maxBidUsername = anonymousCheck(element)
+          }
+          console.log(element.Amount, element.Amount.type,  ' and')
+        });
+        setMaxBid({amount: maxBid, user: maxBidUsername})
+      }
+      else {
+        console.log( "no bids")
+        setMaxBid(initialState)
+      }
+      thisBids = []
+    }
+  }
+
+  function evaluateOneBid(bid) {
+    if(currentItem != null) {
+      if(bid.itemID == currentItem.id && bid.Amount > maxBid.amount) {
+        setMaxBid({amount: bid.Amount, user: anonymousCheck(bid)})
+        alert(anonymousCheck(bid), " just bid ", bid.Amount)
+      }
+    }
+    else
+      console.log('no item')
+    
+  }
+  
   async function printTopItemFromAWS() {
     let items = await DataStore.query(Item);
     if(currentItem == null)
       setCurrentItem(items[0])
-    console.log(items[0].Title);
+    console.log(items.length, items[0].Title);
+  }
+
+  async function setRandomItem() {
+    let items = await DataStore.query(Item);
+    console.log(items.length, ": items queried");
+    let randItem = Math.floor(Math.random() * (items.length))
+    setCurrentItem(items[randItem])
+    console.log(items.length, ": random chose ", items[randItem].Title);
   }
 
   async function printTopBidsFromAWS() {
@@ -109,45 +180,165 @@ function App() {
 
   async function pushNewBid() {
     var bidAmount = Math.floor(Math.random() * 1000);
+    var anon = (bidAmount > 500)
     await DataStore.save(
       new Bids({
-        "itemID": "23e55c41-2517-4288-abe0-5dbe228ad027",
         "Username": "Lorem ipsum dolor sit amet",
         "Amount": bidAmount,
-        "Anonymous": false
+        "Anonymous": anon,
+        "itemID": currentItem.id
       })
     );
     console.log("new bid added");
   }
 
+  async function addLakeHouseItem() {
+    
+    await DataStore.save(
+      new Item({
+        "Title": "Lake House Weekend Getaway",
+        "Description": "Enjoy a weekend in the beautiful hills of North Carolina in this log cabin house.  Any weekend in the month of March, head on up for family, fishing, and fun while supporting the mission of hannah's home",
+        "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/logCabinImageDemo.jpeg"],
+        "ItemToBids": []
+      })
+    );
+    console.log("item added: Lake House");
+  }
+
+  function anonymousCheck(element) {
+    if(element.Anonymous) {
+      return 'Anonymous'
+    }
+    else
+      return element.Username
+  }
+
+  async function addFirstPitchItem() {
+    await DataStore.save(
+      new Item({
+        "Title": "First Pitch at Roger Dean",
+        "Description": "Live out your Tee Ball fantasy of making it to the big leauges by giving the first pitch at an upcoming Marlin's game at Roger Dean Stadium and then have front row seats for the rest of the game",
+        "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/baseball.jpg"],
+        "ItemToBids": []
+      })
+    );
+    console.log("item added: Pitch");
+  }
+
   async function deleteBids() {
-    await DataStore.delete(Bids, Predicates.ALL);
+    await DataStore.delete(Bids, Predicates.ALL);  
     console.log("all bids deleted");
+  }
+
+  function returnMaxBid(bids, id) {
+    var thisBids = bids.filter(function(element) {
+      return element.itemID == id
+    })
+    if(thisBids != null) {
+      console.log("comparing...")
+      thisBids.array.forEach(element => {
+        console.log(element.Amount, ' and')
+      });
+      console.log("max is ", Math.max(...thisBids))
+      return Math.max(...thisBids)
+    }
+    else {
+      return "no bids"
+    }
   }
 
   return (
 
        <View style={styles.container}>
+         {/* <S3Image imgKey={"logCabinImageDemo.jpeg"} style={{ width: 300, height: 100 }}  onLoad={url => console.log("loaded", url)} /> */}
+         {/* <Image source={{uri: "https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/logCabinImageDemo.jpeg"}} style={{ width: 300, height: 100 }}/> */}
         <Text style= {styles.titleText}>{currentItem == null ? "" : currentItem.Title}</Text>
         <Text>{currentItem == null ? "" : currentItem.Description}</Text>
+        {currentItem == null ? <View styles={{height: 0}}/> : <Image source={{uri: currentItem.Photos[0]}} style={{ width: 300, height: 100 }}/> }
 
+        {/* Changing Item */}
         <View style={{paddingBottom: 30}}></View>
+        <View style={{flexDirection: 'row'}}>
+
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={addLakeHouseItem}
+                  >LakeHouse</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={addFirstPitchItem}
+                  >FirstPitch</Text>
+              </View>
+          <View style={styles.tomSquare}>
+              <Text style = {styles.centerTextBoth}
+                onPress={setRandomItem}
+              >Random Item</Text>
+          </View>
+        </View>
+
+         {/* Bid operations */}
+        <View style={{paddingBottom: 30}}></View>
+        <View style={{flexDirection: 'row'}}>
+
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={pushNewBid}
+                  >Add Bid</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={printTopBidsFromAWS}
+                  >Get Bids</Text>
+              </View>
+          <View style={styles.tomSquare}>
+              <Text style = {styles.centerTextBoth}
+                onPress={deleteBids}
+              >Delete All Bids</Text>
+          </View>
+        </View>
+
         <Text onPress={printTopItemFromAWS} style={styles.bigText}>Get Items</Text>
-        <Text onPress={printTopBidsFromAWS} style={styles.bigText}>Get Bids</Text>
-        <Text onPress={pushNewBid} style={styles.bigText}>    Add Bid</Text>
-        <Text onPress={deleteBids} style={styles.bigText}>Delete All Bids</Text>
-        {bids.map((item, i) => {
-            return (
-              <Text key={i} >Bid Item: {item.Amount}</Text>
-            )
-        }).sort(function (a,b) { return a.Amount < b.Amount })}
+
+        <Text>{
+            "Max Bid:" + maxBid.user + " at " + maxBid.amount
+        }</Text>
+
+        <View style={{flexDirection: 'row'}}>
+        <View style= {styles.bidList}>
+          <Text>---All Bids---</Text>
+          {bids.map((item, i) => {
+              return (
+                <Text key={i} >Bid Item: {item.Amount}</Text>
+              )
+          }).sort(function (a,b) { return a.Amount < b.Amount })}
+        </View>
+
+        <View style= {styles.bidList}>
+          <Text>---Current Item Bids---</Text>
+          {bids
+            .filter(function (bid) { 
+              if(currentItem != null) 
+                return bid.itemID == currentItem.id
+              else
+                return false
+            })
+            .map((item, i) => {
+                return (
+                  <Text key={i} >Bid Item: {item.Amount}</Text>
+                )
+            })
+            .sort(function (a,b) { return a.Amount < b.Amount })}
+        </View>
 
       </View>
+    </View>
 
   );
 }
 
 export default App //withAuthenticator(App, true);
+
 
 
 
@@ -331,7 +522,9 @@ const styles = StyleSheet.create({
   messageBody: {fontSize: 16, color: '#fff',  borderRadius: 45, padding:8},
   bodyHolder: {borderRadius:10, backgroundColor: '#6b8bd6'},
   bigText: {fontSize: 25, color: "#3cbcde", padding: 20, fontWeight: 'bold'},
-  titleText: {fontSize: 20, color: "#000000", textAlign: 'center',  paddingBottom: 20, fontWeight: 'bold'}
-
+  titleText: {fontSize: 20, color: "#000000", textAlign: 'center',  paddingBottom: 20, fontWeight: 'bold'},
+  tomSquare: {fontSize: 10, backgroundColor: "#03dffc", textAlign: 'center', textAlignVertical: 'center', width: 100, height: 100, borderWidth: 3, margin: 4},
+  centerTextBoth: {textAlign: 'center', textAlignVertical: 'center', paddingTop:40},
+  bidList: {margin: 10}
 
 });
