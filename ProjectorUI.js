@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState }  from 'react';
 import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Animated} from 'react-native';
 
 const ProjectorUI = () => {
-    var topBid = 110;
+    var topBid = 210;
     var percent = (topBid/800) * 100
     var pBarWidth = ''.concat(percent.toFixed(2), '%')
 
@@ -26,8 +26,10 @@ const ProjectorUI = () => {
                 </View> */}
             
 
-            <View style={styles.progressBar}>
-                <Animated.View style={[StyleSheet.absoluteFill], {backgroundColor: '#377be6', width: pBarWidth }}/>
+            <View style={styles.progressBarBackground}>
+                <Animated.View style={[StyleSheet.absoluteFill], {backgroundColor: '#377be6', width: pBarWidth, borderTopLeftRadius: 60, borderBottomLeftRadius: 60 }}>
+                    <Text style={styles.progressBarText}>$1,250</Text>
+                </Animated.View>
             </View>
         
             <Text style={{textAlign: 'center'}}>{percent}%</Text>
@@ -50,25 +52,14 @@ const styles = StyleSheet.create({
     messageBody: {fontSize: 16, color: '#fff',  borderRadius: 45, padding:8},
     bodyHolder: {borderRadius:10, backgroundColor: '#6b8bd6'},
     
-    progressBar: { height: 100, width: '100%', backgroundColor: '#c4c4c4', borderColor: '#000', borderWidth: 0, borderRadius: 60, flexDirection:"row" },
-   
-    box: {
-        margin: 10,
-        flex: 1,
-        backgroundColor: 'transparent',
-        borderColor: 'white',
-        borderWidth: 30,
-        overflow: 'hidden',
-        shadowColor: 'black',
-        shadowRadius: 10,
-        shadowOpacity: 1,
-        },
+    progressBarBackground: { height: 80, width: '90%', backgroundColor: '#c4c4c4', borderColor: '#000', borderWidth: 0, borderRadius: 60, flexDirection:"row", alignSelf: 'center' },
+    progressBarForeground: {backgroundColor: '#377be6', borderTopLeftRadius: 60, borderBottomLeftRadius: 60 , justifyContent: 'center'},
+    progressBarText:       {fontSize: 30, fontWeight: "bold", textAlign: 'center', color: '#ffffff', marginTop: 20},
 
-
-    itemTitle:          {fontSize: 70, fontWeight: "bold", textAlign: 'center'},
-    itemDescription:    {fontSize: 20, color: '#676c75', textAlign: 'center'},
-    bidPrice:           {fontSize: 45, fontWeight: "bold", textAlign: 'center'},
-    bidTags:            {fontSize: 20, color: '#7c838f', textAlign: 'center'},
+    itemTitle:          { fontSize: 70, fontWeight: "bold", textAlign: 'center'},
+    itemDescription:    { fontSize: 20, color: '#676c75', textAlign: 'center'},
+    bidPrice:           { fontSize: 45, fontWeight: "bold", textAlign: 'center'},
+    bidTags:            { fontSize: 20, color: '#7c838f', textAlign: 'center'},
 
     buttons:            { height: 50, backgroundColor: '#377be6', borderRadius:10 , padding: 10, marginTop: 10, width: '90%', alignSelf: 'center'},
     buttonsText:        { color: '#fff', fontSize: 25, textAlign: "center", fontWeight: 'bold' },
