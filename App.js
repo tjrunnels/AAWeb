@@ -24,6 +24,7 @@ import config from './aws-exports'
 Amplify.configure(config)
 import { withAuthenticator, S3Image } from 'aws-amplify-react-native'; 
 import { render } from 'react-dom';
+import ProjectorUI from './ProjectorUI';
 
 const signUpConfig = {
   hideAllDefaults: true,
@@ -341,7 +342,7 @@ function App() {
 
 
 //tomdo: change
-export default App //withAuthenticator(App, true);
+export default ProjectorUI //withAuthenticator(App, true);
 
 
 
