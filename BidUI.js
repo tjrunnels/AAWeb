@@ -8,13 +8,13 @@ const BidUI = () => {
   <View style={styles.container}>
 
     {/* Item info */}
-        <View style={{height:150, marginBottom:30, backgroundColor: '#ddd'}}>
+        <View style={{height:150, marginBottom:30, backgroundColor: '#fff'}}>
             <Text style={styles.itemTitle}>Lake Cabin Getaway</Text>
             <Text style={styles.itemDescription}>Enjoy a weekend in the beautiful hills of North Carolina in this log cabin house.  Any weekend in the month of March, head on up for family, fishing, and fun while supporting the mission of hannah's home</Text> 
         </View>
 
     {/* Current Bid info */}
-    <View style={{height:100, marginBottom:10, backgroundColor: '#ddd'}}>
+    <View style={{height:100, marginBottom:10, backgroundColor: '#fff'}}>
             
             <Text style={styles.bidTags}>Highest Bid:</Text> 
             <Text style={styles.bidPrice}>$110</Text> 
@@ -68,20 +68,8 @@ export default BidUI
 
 
 const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: "#e8dcdd" },
-    message: {  marginBottom: 15 },
-    input: { height: 50, backgroundColor: '#ddd', marginBottom: 10, padding: 8 },
-    preButtonsText: {color: '#000', fontSize: 25, textAlign: "left", fontWeight: 'bold', padding: 10, marginBottom: 10},
-    buttons: { height: 50, backgroundColor: '#6b8bd6', borderRadius:10 , padding: 10, marginBottom: 10, minWidth: 140},
-    buttonsText: { color: '#fff', fontSize: 20, textAlign: "center", fontWeight: 'bold' },
-    messageauthor: { fontSize: 12, color: '#a8a69e' },
-    messageBody: {fontSize: 16, color: '#fff',  borderRadius: 45, padding:8},
-    bodyHolder: {borderRadius:10, backgroundColor: '#6b8bd6'},
-    bigText: {fontSize: 25, color: "#3cbcde", padding: 20, fontWeight: 'bold'},
-    titleText: {fontSize: 20, color: "#000000", textAlign: 'center',  paddingBottom: 20, fontWeight: 'bold'},
-    tomSquare: {fontSize: 10, backgroundColor: "#03dffc", textAlign: 'center', textAlignVertical: 'center', width: 100, height: 100, borderWidth: 3, margin: 4},
-    centerTextBoth: {textAlign: 'center', textAlignVertical: 'center', paddingTop:40},
-    bidList: {margin: 10},
+    container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: "#ffffff" },
+
 
 
 
