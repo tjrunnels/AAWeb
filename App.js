@@ -341,7 +341,7 @@ function App() {
 
 
 //tomdo: change
-export default App //withAuthenticator(App, true);
+export default App // withAuthenticator(App, {includeGreetings: true});
 
 
 

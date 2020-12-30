@@ -2,8 +2,29 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, Component } from 'react';
 import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Image} from 'react-native';
 
+
+
+
+
+
+
 const BidUI = () => {
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   return (
   <View style={styles.container}>
 
