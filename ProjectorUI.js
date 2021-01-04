@@ -4,13 +4,109 @@ import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableO
 
 import InsetShadow from 'react-native-inset-shadow'
 
+//from backend 
+import {listBids, setRandomItem, evaluateOneBid, evaluateAllBids } from './Backend'
+
+//from amazon
+import { Item, Bids} from './models';
+import { DataStore } from '@aws-amplify/datastore';
+
+
+
+//tomdo: delete.  for testing
+var testItem = new Item({
+    "Title": "Test Item",
+    "Description": "Ever wondered what the sunset looks like offshore?  Well you can find out with this exclusive boat excursion.  Just you, a guest, and the captain will sail out an hour before sunset and come back in 30 minutes after, drinks included.",
+    "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/baseball.jpg"],
+    "ItemToBids": []
+  })
+  
+// const initialState = { amount: 0, user: '' }
+
 
 const ProjectorUI = () => {
-    var topBid = 220;
-    var percent = (topBid/800) * 100
-    var pBarWidth = ''.concat(percent.toFixed(2), '%')
+
+    const [bids, setBids] = useState([0]);
+    const [currentItem, setCurrentItem] = useState(testItem); //tomdo: take out testItem
+    const [maxBid, setMaxBid] = useState({amount: 0, user: ''})
+    const [goal, setGoal] = useState(800)
+
+
+    let [percent, setPercent] = useState(5);
+    let animation = useRef(new Animated.Value(0));
+
+
+
+    useEffect(() => {
+        listBids(setBids) 
+        
+        
+            console.log("useEffect for [] running... note: should happen just once")
+            const bidSubscription = DataStore.observe(Bids).subscribe(msg => {
+              listBids(setBids)
+              //these are the only three opTypes: INSERT, UPDATE, and DELETE
+              if (msg.opType == 'INSERT') {
+                console.log(msg.opType, "element:", msg.element);
+                //evaluateOneBid(msg.element)
+              }
+                if (msg.opType == 'UPDATE')
+                console.log("Updated: ", msg.element.id, " to: ", msg.element);
+              else if (msg.opType == 'DELETE')
+                console.log("Deleted: ", msg.element.id)
+              
+            });
+            const itemSubscription = DataStore.observe(Item).subscribe(msg => {
+              if (msg.opType == 'INSERT') {
+                console.log("Just recieved new item:", msg.element.Title);
+                setCurrentItem(msg.element);
+
+              }
+            })
+          }, [])
+
+
+    //currentItem effect
+    useEffect(() => {
+        evaluateAllBids(currentItem, bids, setMaxBid)
+        //update goal
+    }, [currentItem])
+  
+    //bids effect
+    useEffect(() => {
+        evaluateOneBid(bids[bids.length - 1], currentItem, maxBid,setMaxBid)
+    }, [bids])
+
+    
     var shadowWidth =  ''.concat((100-percent).toFixed(2), '%')
     var shadowMargin =  ''.concat((percent).toFixed(2), '%')     
+
+    //maxbid effect
+    useEffect(() => {
+        let temp = ((maxBid.amount/goal) * 100) //tomdo: change 800 to goal 
+        if(temp < 5) { temp = 5}
+        setPercent(temp)
+        shadowWidth =  ''.concat((100-percent).toFixed(2), '%')
+        shadowMargin =  ''.concat((percent).toFixed(2), '%')
+        console.log("ProjectorUI: useEffect for maxBid run")
+    }, [maxBid])
+
+
+      //for progress bar animation
+    useEffect(() => {
+        Animated.timing(animation.current, {
+        toValue: percent,
+        duration: 300
+        }).start();
+    },[percent])
+
+    let pBarWidth = animation.current.interpolate({
+        inputRange: [0, 100],
+        outputRange: ["0%", "100%"],
+        extrapolate: "clamp"
+    })
+
+
+
 
     return (
         <View style={styles.container}>
@@ -18,8 +114,8 @@ const ProjectorUI = () => {
             {/* Item info */}
                 <View style={{height:150, marginBottom:0, backgroundColor: '#fff', width: 850, alignSelf: 'center', marginBottom: 200, marginTop: 30}}>
                     <Text style={styles.itemDescription}>Current Auction</Text> 
-                    <Text style={styles.itemTitle}>Lake Cabin Getaway</Text>
-                    <Text style={styles.itemDescription}>Enjoy a weekend in the beautiful hills of North Carolina in this log cabin house.  Any weekend in the month of March, head on up for family, fishing, and fun while supporting the mission of hannah's home</Text> 
+                    <Text style={styles.itemTitle} onPress={() => {setRandomItem(setCurrentItem)}}>{currentItem.Title}</Text>
+                    <Text style={styles.itemDescription}>{currentItem.Description}</Text> 
                 </View>
 
             {/* Current Bid info
@@ -35,22 +131,21 @@ const ProjectorUI = () => {
 
                 <View style={styles.progressBarBackground}>
                     <Animated.View style={[StyleSheet.absoluteFill], {backgroundColor: '#377be6', width: pBarWidth, borderTopLeftRadius: 60, borderBottomLeftRadius: 60 }}>
-                        <Text style={styles.progressBarText}>$1,250</Text>
+                        <Text style={styles.progressBarText}>${maxBid.amount}</Text>
                     </Animated.View>
                 </View>
-                <InsetShadow left={false} right={false} bottom={false} shadowRadius={20} shadowOpacity={.60} containerStyle={{width: shadowWidth, height: '100%',position: 'absolute', left: 0, top: 0, marginLeft: shadowMargin, borderTopRightRadius: 60, borderBottomRightRadius: 60  }}>
+                <InsetShadow left={false} right={false} bottom={false} shadowRadius={20} shadowOpacity={.60} containerStyle={{width: shadowWidth, height: '100%',position: 'absolute', left: 0, top: 0, marginLeft: shadowMargin, borderTopRightRadius: 60, borderBottomRightRadius: 60,  }}>
                     <View></View>
                 </InsetShadow>
             </View>
 
-            <Text style={styles.goalText}>Goal: $8000</Text>
+            <Text style={styles.goalText}>Goal: ${goal}</Text>
             
             <View style={styles.imageView}>
-                <Image source={{uri: "https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/baseball.jpg"}} style={styles.imageStyle}/> 
+                <Image source={{uri: currentItem.Photos[0]}} style={styles.imageStyle}/> 
                 <Image source={{uri: "https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/logCabinImageDemo.jpeg"}} style={styles.imageStyle}/> 
                 <Image source={{uri: "https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/baseball.jpg"}} style={styles.imageStyle}/> 
             </View>
-            {/* <Text style={{textAlign: 'center'}}>{percent}%</Text> */}
         </View>
 
     );

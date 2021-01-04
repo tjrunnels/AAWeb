@@ -217,7 +217,7 @@ function App() {
 
 
 //tomdo: change
-export default BidUI //withAuthenticator(BidUI, {includeGreetings: true});
+export default ProjectorUI //withAuthenticator(BidUI, {includeGreetings: true});
 
 
 
