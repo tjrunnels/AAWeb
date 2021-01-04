@@ -4,26 +4,20 @@ import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableO
 
 //from my code
 import BidUI from './BidUI'
-
-//from other stuff
-import {randomColor} from 'randomcolor'
-
-
-//import gql from 'graphql-tag';
-// import awsconfig from './aws-exports';
+import ProjectorUI from './ProjectorUI'
 
 //from admin UI
 import { DataStore, Predicates } from '@aws-amplify/datastore';
 import { Item, Bids} from './models';
 
 
-
-import Amplify from 'aws-amplify'
-import AWSAppSyncClient, { AUTH_TYPE } from 'aws-appsync';
-import config from './aws-exports'
- Amplify.configure(config)
 import { withAuthenticator, S3Image } from 'aws-amplify-react-native'; 
-import { render } from 'react-dom';
+
+
+//backend functions
+import {listBids, pushNewBid, evaluateAllBids, evaluateOneBid, anonymousCheck, printTopItemFromAWS,
+         setRandomItem, printTopBidsFromAWS, deleteBids, addLakeHouseItem, addFirstPitchItem } from './Backend'
+
 
 const signUpConfig = {
   hideAllDefaults: true,
@@ -59,10 +53,11 @@ const signUpConfig = {
   ],
 }
 
-async function listBids(setBids) {
-  const bids = await DataStore.query(Bids, Predicates.ALL)
-  setBids(bids);
-}
+// async function listBids(setBids) {
+//   const thisbids = await DataStore.query(Bids, Predicates.ALL)
+//   setBids(thisbids);
+//   console.log('Backend: listBids finished')
+// }
 
 const initialState = { amount: 0, user: '' }
 
@@ -100,136 +95,18 @@ function App() {
 
     //currentItem effect
     useEffect(() => {
-      evaluateAllBids()
+      evaluateAllBids(currentItem, bids, setMaxBid)
     }, [currentItem])
 
      //bids effect
      useEffect(() => {
-      evaluateOneBid(bids[bids.length - 1])
+      evaluateOneBid(bids[bids.length - 1], currentItem, maxBid,setMaxBid)
     }, [bids])
 
   
-  function evaluateAllBids() {
-    if(currentItem != null) {
-      var id = currentItem.id
-      var thisBids = bids
-          .filter(function (bid) { 
-            if(currentItem != null) 
-              return bid.itemID == currentItem.id
-            else
-              return false
-          })
-      console.log("thisBids length: ", thisBids.length)
-
-      if(thisBids.length != 0) {
-        console.log("comparing...")
-        
-        var maxBid = 0
-        var maxBidUsername = ""
-        thisBids.forEach(element => {
-          if(element.Amount > maxBid) {
-            maxBid = element.Amount
-            maxBidUsername = anonymousCheck(element)
-          }
-          console.log(element.Amount, element.Amount.type,  ' and')
-        });
-        setMaxBid({amount: maxBid, user: maxBidUsername})
-      }
-      else {
-        console.log( "no bids")
-        setMaxBid(initialState)
-      }
-      thisBids = []
-    }
-  }
-
-  function evaluateOneBid(bid) {
-    if(currentItem != null) {
-      if(bid.itemID == currentItem.id && bid.Amount > maxBid.amount) {
-        setMaxBid({amount: bid.Amount, user: anonymousCheck(bid)})
-        alert(anonymousCheck(bid), " just bid ", bid.Amount)
-      }
-    }
-    else
-      console.log('no item')
-    
-  }
   
-  async function printTopItemFromAWS() {
-    let items = await DataStore.query(Item);
-    if(currentItem == null)
-      setCurrentItem(items[0])
-    console.log(items.length, items[0].Title);
-  }
 
-  async function setRandomItem() {
-    let items = await DataStore.query(Item);
-    console.log(items.length, ": items queried");
-    let randItem = Math.floor(Math.random() * (items.length))
-    setCurrentItem(items[randItem])
-    console.log(items.length, ": random chose ", items[randItem].Title);
-  }
 
-  async function printTopBidsFromAWS() {
-    let bids = await DataStore.query(Bids);
-    if (bids.length != 0)
-      console.log("there are ", bids.length, " bids, first is: ", bids[0].Amount);
-    else
-      console.log("bids empty")
-    
-  }
-
-  async function pushNewBid() {
-    var bidAmount = Math.floor(Math.random() * 1000);
-    var anon = (bidAmount > 500)
-    await DataStore.save(
-      new Bids({
-        "Username": "Lorem ipsum dolor sit amet",
-        "Amount": bidAmount,
-        "Anonymous": anon,
-        "itemID": currentItem.id
-      })
-    );
-    console.log("new bid added");
-  }
-
-  async function addLakeHouseItem() {
-    
-    await DataStore.save(
-      new Item({
-        "Title": "Lake House Weekend Getaway",
-        "Description": "Enjoy a weekend in the beautiful hills of North Carolina in this log cabin house.  Any weekend in the month of March, head on up for family, fishing, and fun while supporting the mission of hannah's home",
-        "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/logCabinImageDemo.jpeg"],
-        "ItemToBids": []
-      })
-    );
-    console.log("item added: Lake House");
-  }
-
-  function anonymousCheck(element) {
-    if(element.Anonymous) {
-      return 'Anonymous'
-    }
-    else
-      return element.Username
-  }
-
-  async function addFirstPitchItem() {
-    await DataStore.save(
-      new Item({
-        "Title": "First Pitch at Roger Dean",
-        "Description": "Live out your Tee Ball fantasy of making it to the big leauges by giving the first pitch at an upcoming Marlin's game at Roger Dean Stadium and then have front row seats for the rest of the game",
-        "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/baseball.jpg"],
-        "ItemToBids": []
-      })
-    );
-    console.log("item added: Pitch");
-  }
-
-  async function deleteBids() {
-    await DataStore.delete(Bids, Predicates.ALL);  
-    console.log("all bids deleted");
-  }
 
   function returnMaxBid(bids, id) {
     var thisBids = bids.filter(function(element) {
@@ -273,7 +150,7 @@ function App() {
               </View>
           <View style={styles.tomSquare}>
               <Text style = {styles.centerTextBoth}
-                onPress={setRandomItem}
+                onPress={() => {setRandomItem(setCurrentItem)}}
               >Random Item</Text>
           </View>
         </View>
@@ -284,7 +161,7 @@ function App() {
 
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBoth}
-                    onPress={pushNewBid}
+                    onPress={() => {pushNewBid(currentItem)}}
                   >Add Bid</Text>
               </View>
           <View style={styles.tomSquare}>
@@ -299,7 +176,7 @@ function App() {
           </View>
         </View>
 
-        <Text onPress={printTopItemFromAWS} style={styles.bigText}>Get Items</Text>
+        <Text onPress={() => {printTopItemFromAWS(currentItem, setCurrentItem)}} style={styles.bigText}>Get Items</Text>
 
         <Text>{
             "Max Bid:" + maxBid.user + " at " + maxBid.amount
@@ -340,7 +217,7 @@ function App() {
 
 
 //tomdo: change
-export default withAuthenticator(BidUI, {includeGreetings: true});
+export default App //withAuthenticator(BidUI, {includeGreetings: true});
 
 
 

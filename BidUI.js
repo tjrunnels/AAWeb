@@ -7,6 +7,10 @@ import { DataStore, Predicates } from '@aws-amplify/datastore';
 import { Item, Bids} from './models';
 
 
+//from backend
+import { listBids } from './Backend'
+
+
 import Amplify from 'aws-amplify'
 import config from './aws-exports'
 Amplify.configure(config)
@@ -35,11 +39,6 @@ const BidUI = () => {
   const [currentUser, setCurrentUser] = useState()
 
 
-  //for some reason is outside of the component
-  async function listBids(setBids) {
-  const bids = await DataStore.query(Bids, Predicates.ALL)
-  setBids(bids);
-}
 
   //////////////////////////////////////////
   //    on startup effect
