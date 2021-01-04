@@ -21,7 +21,7 @@ import { Item, Bids} from './models';
 import Amplify from 'aws-amplify'
 import AWSAppSyncClient, { AUTH_TYPE } from 'aws-appsync';
 import config from './aws-exports'
-Amplify.configure(config)
+ Amplify.configure(config)
 import { withAuthenticator, S3Image } from 'aws-amplify-react-native'; 
 import { render } from 'react-dom';
 
@@ -68,10 +68,9 @@ const initialState = { amount: 0, user: '' }
 
 function App() {
 
-    const [bids, setBids] = useState([]);
+    const [bids, setBids] = useState([0]);
     const [currentItem, setCurrentItem] = useState();
     const [maxBid, setMaxBid] = useState(initialState)
-    var displayedItems = [];
 
   useEffect(() => {
     listBids(setBids) 
@@ -341,7 +340,7 @@ function App() {
 
 
 //tomdo: change
-export default App // withAuthenticator(App, {includeGreetings: true});
+export default withAuthenticator(BidUI, {includeGreetings: true});
 
 
 
@@ -529,6 +528,6 @@ const styles = StyleSheet.create({
   titleText: {fontSize: 20, color: "#000000", textAlign: 'center',  paddingBottom: 20, fontWeight: 'bold'},
   tomSquare: {fontSize: 10, backgroundColor: "#03dffc", textAlign: 'center', textAlignVertical: 'center', width: 100, height: 100, borderWidth: 3, margin: 4},
   centerTextBoth: {textAlign: 'center', textAlignVertical: 'center', paddingTop:40},
-  bidList: {margin: 10}
+  bidList: {margin: 10, maxHeight: 200}
 
 });
