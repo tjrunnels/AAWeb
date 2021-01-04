@@ -15,7 +15,7 @@ import { withAuthenticator, S3Image } from 'aws-amplify-react-native';
 
 
 //backend functions
-import {listBids, pushNewBid, evaluateAllBids, evaluateOneBid, anonymousCheck, printTopItemFromAWS,
+import {listBids, pushNewRandomBid, evaluateAllBids, evaluateOneBid, anonymousCheck, printTopItemFromAWS,
          setRandomItem, printTopBidsFromAWS, deleteBids, addLakeHouseItem, addFirstPitchItem } from './Backend'
 
 
@@ -161,7 +161,7 @@ function App() {
 
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBoth}
-                    onPress={() => {pushNewBid(currentItem)}}
+                    onPress={() => {pushNewRandomBid(currentItem)}}
                   >Add Bid</Text>
               </View>
           <View style={styles.tomSquare}>
@@ -217,7 +217,7 @@ function App() {
 
 
 //tomdo: change
-export default App //withAuthenticator(BidUI, {includeGreetings: true});
+export default BidUI //withAuthenticator(BidUI, {includeGreetings: true});
 
 
 

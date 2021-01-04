@@ -15,7 +15,7 @@ export async function listBids(setBids) {
   }
   
 
-export async function pushNewBid(currentItem) {
+export async function pushNewRandomBid(currentItem) {
     var bidAmount = Math.floor(Math.random() * 1000);
     var anon = (bidAmount > 500)
     await DataStore.save(
@@ -29,8 +29,35 @@ export async function pushNewBid(currentItem) {
     console.log("Backend: new bid added");
   }
 
+
+
+
+ export async function pushNewBid(amount, currentItem, currentUser) {
+    var bidAmount = amount
+    var anon = (bidAmount > 500)
+    await DataStore.save(
+      new Bids({
+        "Username": currentUser,
+        "Amount": bidAmount,
+        "Anonymous": false,
+        "itemID": currentItem.id
+      })
+    );
+    console.log("new bid added");
+  }
+
+
+
+
+
 const initialState = { amount: 0, user: '' }
 
+  //////////////////////////////////////////
+  //    - evaluate all bids - 
+  //    looks at the 'bids' hook which is a list of ALL bids in AWS,
+  //    filters them by if they are part of the 'currentItem',
+  //    and sets the 'maxBid' hook's .Amount property 
+  //////////////////////////////////////////
 export function evaluateAllBids(currentItem, bids, setMaxBid) {
     if(currentItem != null) {
       var id = currentItem.id
@@ -66,12 +93,17 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
     }
   }
 
-
+  //////////////////////////////////////////
+  //    - evaluate one bids -
+  //    looks at the bid (which is a msg.element),
+  //    sees if it is part of the 'currentItem',
+  //    and updates the 'maxBid' if this new bid is higher (should bascially always be)
+  //////////////////////////////////////////
  export  function evaluateOneBid(bid, currentItem, maxBid, setMaxBid) {
     if(currentItem != null) {
       if(bid.itemID == currentItem.id && bid.Amount > maxBid.amount) {
         setMaxBid({amount: bid.Amount, user: anonymousCheck(bid)})
-        alert(anonymousCheck(bid), " just bid ", bid.Amount)
+        //alert(anonymousCheck(bid), " just bid ", bid.Amount)
       }
     }
     else {
@@ -80,7 +112,11 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
     console.log("Backend: evalateOneBid finished for: ", bid.id)
   }
 
-
+  //////////////////////////////////////////
+  //    - Anonymous Check -
+  //    to be called whenever the bid.user is printed,
+  //    since it will either return bid.user or 'anonymous' if the bid is sent anonymously
+  //////////////////////////////////////////
  export  function anonymousCheck(element) {
     if(element.Anonymous) {
       return 'Anonymous'

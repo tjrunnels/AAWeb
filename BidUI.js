@@ -8,7 +8,7 @@ import { Item, Bids} from './models';
 
 
 //from backend
-import { listBids } from './Backend'
+import { listBids, evaluateAllBids, evaluateOneBid, pushNewBid, anonymousCheck, setRandomItem} from './Backend'
 
 
 import Amplify from 'aws-amplify'
@@ -92,7 +92,7 @@ const BidUI = () => {
   //////////////////////////////////////////
   useEffect(() => {
     console.log('running useEffect for currentItem')
-    evaluateAllBids()
+    evaluateAllBids(currentItem, bids, setMaxBid)
   }, [currentItem])
 
 
@@ -104,105 +104,11 @@ const BidUI = () => {
   useEffect(() => {
     console.log('running useEffect for bids')
     if(bids.length > 0)
-      evaluateOneBid(bids[bids.length - 1])
+      evaluateOneBid(bids[bids.length - 1], currentItem, maxBid, setMaxBid)
   }, [bids])
 
 
 
-
-  //////////////////////////////////////////
-  //    - evaluate all bids - 
-  //    looks at the 'bids' hook which is a list of ALL bids in AWS,
-  //    filters them by if they are part of the 'currentItem',
-  //    and sets the 'maxBid' hook's .Amount property 
-  //////////////////////////////////////////
-  function evaluateAllBids() {
-    if(currentItem != null) {
-      var id = currentItem.id
-      var thisBids = bids
-          .filter(function (bid) { 
-            if(currentItem != null) 
-              return bid.itemID == currentItem.id
-            else
-              return false
-          })
-      console.log("thisBids length: ", thisBids.length)
-
-      if(thisBids.length != 0) {
-        console.log("comparing...")
-        
-        var localmaxBid = 0
-        var localmaxBidUsername = ""
-        thisBids.forEach(element => {
-          if(element.Amount > maxBid) {
-            maxBid = element.Amount
-            maxBidUsername = anonymousCheck(element)
-          }
-          console.log(element.Amount, element.Amount.type,  ' and')
-        });
-        setMaxBid({amount: localmaxBid, user: localmaxBidUsername})
-      }
-      else {
-        console.log( "no bids")
-        setMaxBid(initialState)
-      }
-      thisBids = []
-    }
-  }
-
-
-
-  //////////////////////////////////////////
-  //    - evaluate one bids -
-  //    looks at the bid (which is a msg.element),
-  //    sees if it is part of the 'currentItem',
-  //    and updates the 'maxBid' if this new bid is higher (should bascially always be)
-  //////////////////////////////////////////
-  function evaluateOneBid(bid) {
-    if(currentItem != null) {
-      if(bid.Amount > maxBid.amount && bid.itemID == currentItem.id ) {
-        setMaxBid({amount: bid.Amount, user: anonymousCheck(bid)})
-        //alert(anonymousCheck(bid), " just bid ", bid.Amount)
-      }
-    }
-    else
-      console.log('no item')
-  }
-
-
-
-  async function pushNewBid(amount) {
-    var bidAmount = amount
-    var anon = (bidAmount > 500)
-    await DataStore.save(
-      new Bids({
-        "Username": currentUser,
-        "Amount": bidAmount,
-        "Anonymous": false,
-        "itemID": currentItem.id
-      })
-    );
-    console.log("new bid added");
-  }
-
-  function pushNewBida(maxBid) {
-    console.log("new bid added", maxBid);
-  }
-
-  //////////////////////////////////////////
-  //    - Anonymous Check -
-  //    to be called whenever the bid.user is printed,
-  //    since it will either return bid.user or 'anonymous' if the bid is sent anonymously
-  //////////////////////////////////////////
-  function anonymousCheck(element) {
-    if(element.Anonymous) {
-      return 'Anonymous'
-    }
-    else
-      return element.Username
-  }
-
-  
 
 
 
@@ -244,28 +150,28 @@ const BidUI = () => {
 
     <View> 
         <View style={styles.buttonView}>
-          <TouchableOpacity style={styles.buttons} onPress={() => { pushNewBid((maxBid.amount) + increment) }}>
+          <TouchableOpacity style={styles.buttons} onPress={() => { pushNewBid(((maxBid.amount) + increment), currentItem, currentUser) }}>
             <Text style={styles.buttonsText}>Bid: ${maxBid.amount + increment}</Text>
           </TouchableOpacity>
           <Text style={styles.buttonTags}>Increase Bid by +{increment}</Text>
         </View>
 
         <View style={styles.buttonView}>
-          <TouchableOpacity style={styles.buttons} onPress={() => { pushNewBid(maxBid.amount + (increment * 2)) }}>
+          <TouchableOpacity style={styles.buttons} onPress={() => { pushNewBid((maxBid.amount + (increment * 2)), currentItem, currentUser) }}>
             <Text style={styles.buttonsText}>Bid: ${maxBid.amount + (increment * 2)}</Text>
           </TouchableOpacity>
           <Text style={styles.buttonTags}>Increase Bid by +{(increment * 2)}</Text>
         </View>
 
         <View style={styles.buttonView}>
-          <TouchableOpacity style={styles.buttons} onPress={() => { pushNewBid(maxBid.amount + (increment * 4)) }}>
+          <TouchableOpacity style={styles.buttons} onPress={() => { pushNewBid((maxBid.amount + (increment * 4)), currentItem, currentUser) }}>
             <Text style={styles.buttonsText}>Bid: ${maxBid.amount + (increment * 4)}</Text>
           </TouchableOpacity>
           <Text style={styles.buttonTags}>Increase Bid by +{(increment * 4)}</Text>
         </View>
         
         
-        <TouchableOpacity style={styles.buttons} >
+        <TouchableOpacity style={styles.buttons} onPress={() => { setRandomItem(setCurrentItem) }}>
           <Text style={styles.buttonsText}>Custom Bid</Text>
         </TouchableOpacity>  
 
