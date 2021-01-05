@@ -132,17 +132,7 @@ const BidUI = () => {
 
 
 
-
-
-
-
-
-
-
-
   
-
-
 
 
   //MARK: - Beginning of UI

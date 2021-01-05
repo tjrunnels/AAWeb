@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "aamobile",
+    "name": "Hannahs Home Auction App",
     "slug": "aamobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,7 +17,9 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ForwardTech.aamobile",
+      "buildNumber": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
