@@ -16,7 +16,7 @@ import { withAuthenticator, S3Image } from 'aws-amplify-react-native';
 
 //backend functions
 import {listBids, pushNewRandomBid, evaluateAllBids, evaluateOneBid, anonymousCheck, printTopItemFromAWS,
-         setRandomItem, printTopBidsFromAWS, deleteBids, addLakeHouseItem, addFirstPitchItem, addGoal, addIncrement } from './Backend'
+         setRandomItem, printTopBidsFromAWS, deleteBids, addLakeHouseItem, addFirstPitchItem, addGoal, addIncrement, pushNewBid } from './Backend'
 
 
 const signUpConfig = {
@@ -59,7 +59,7 @@ const signUpConfig = {
 //   console.log('Backend: listBids finished')
 // }
 
-const initialState = { amount: 0, user: '' }
+const initialState = { amount: 0, user: '' } 
 
 function App() {
 
@@ -68,6 +68,7 @@ function App() {
     const [maxBid, setMaxBid] = useState(initialState)
     const [goal, setGoal] = useState(800)
     const [increment, setIncrement] = useState(100)
+    const [currentPaddle, setCurrentPaddle] = useState(1)
 
   useEffect(() => {
     listBids(setBids) 
@@ -120,7 +121,10 @@ function App() {
       evaluateOneBid(bids[bids.length - 1], currentItem, maxBid,setMaxBid)
     }, [bids])
 
-  
+    
+  function returnBidAtIncrement(incCount) {
+    return (maxBid.amount + (increment * incCount))
+  }
   
 
 
@@ -147,25 +151,26 @@ function App() {
        <View style={styles.container}>
          {/* <S3Image imgKey={"logCabinImageDemo.jpeg"} style={{ width: 300, height: 100 }}  onLoad={url => console.log("loaded", url)} /> */}
          {/* <Image source={{uri: "https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/logCabinImageDemo.jpeg"}} style={{ width: 300, height: 100 }}/> */}
-        <Text style= {styles.titleText}>{currentItem == null ? "" : currentItem.Title}</Text>
-        <Text>{currentItem == null ? "" : currentItem.Description}</Text>
+        {/* <Text style= {styles.titleText}>{currentItem == null ? "" : currentItem.Title}</Text>
+        <Text>{currentItem == null ? "" : currentItem.Description}</Text> */}
         {currentItem == null ? <View styles={{height: 0}}/> : <Image source={{uri: currentItem.Photos[0]}} style={{ width: 300, height: 100 }}/> }
-        <Text style={styles.smolBean}>goal: {goal}, increment: {increment}</Text>
+        <Text style={styles.smolBean}>Item: {currentItem == null ? "" : currentItem.Title.substring(0,20)},     MaxBid:{maxBid.amount},   Goal: {goal},    Increment: {increment}</Text>
 
-        {/* Changing Item */}
-        <View style={{paddingBottom: 30}}></View>
+        {/* Item Tools */}
+        <Text style={styles.rowTitle}>Item tools</Text>
         <View style={{flexDirection: 'row'}}>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={() => {addLakeHouseItem(); addGoal(800); addIncrement(100);}}
+                  >LakeHouse</Text>
+          </View>
 
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBoth}
-                    onPress={addLakeHouseItem}
-                  >LakeHouse</Text>
-              </View>
-          <View style={styles.tomSquare}>
-                  <Text style = {styles.centerTextBoth}
-                    onPress={addFirstPitchItem}
+                    onPress={() => {addFirstPitchItem(); addGoal(1600); addIncrement(200); }}
                   >FirstPitch</Text>
-              </View>
+          </View>
+
           <View style={styles.tomSquare}>
               <Text style = {styles.centerTextBoth}
                 onPress={() => {setRandomItem(setCurrentItem)}}
@@ -173,20 +178,63 @@ function App() {
           </View>
         </View>
 
-         {/* Bid operations */}
-        <View style={{paddingBottom: 30}}></View>
+        {/* Bid Tools */}
+        <Text style={styles.rowTitle}>Bid tools</Text>
         <View style={{flexDirection: 'row'}}>
+          {/* ----------------------------- bid buttons ----------------------------- */}
+          <View style={styles.tomSquare}>
+              <Text style = {styles.centerTextBoth}
+                   onPress={() => {;}}
+              >Custom Bid !!!</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBothBID}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * .5)),currentItem,currentPaddle)}}
+                  >{(maxBid.amount + (increment * .5))}</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBothBID}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 1)),currentItem,currentPaddle)}}
+                  >..{(maxBid.amount + (increment * 1))}..</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBothBID}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 1.5)),currentItem,currentPaddle)}}
+                  >{(maxBid.amount + (increment * 1.5))}</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBothBID}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 2)),currentItem,currentPaddle)}}
+                  >..{(maxBid.amount + (increment * 2))}..</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBothBID}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 2.5)),currentItem,currentPaddle)}}
+                  >{(maxBid.amount + (increment * 2.5))}</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBothBID}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 3)),currentItem,currentPaddle)}}
+                  >..{(maxBid.amount + (increment * 3))}..</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBothBID}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 3.5)),currentItem,currentPaddle)}}
+                  >{(maxBid.amount + (increment * 3.5))}</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBothBID}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 4)),currentItem,currentPaddle)}}
+                  >..{(maxBid.amount + (increment * 4))}..</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBothBID}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 4.5)),currentItem,currentPaddle)}}
+                  >{(maxBid.amount + (increment * 4.5))}</Text>
+              </View>
+          {/* ----------------------------- bid buttons ----------------------------- */}
 
-          <View style={styles.tomSquare}>
-                  <Text style = {styles.centerTextBoth}
-                    onPress={() => {pushNewRandomBid(currentItem)}}
-                  >Add Bid</Text>
-              </View>
-          <View style={styles.tomSquare}>
-                  <Text style = {styles.centerTextBoth}
-                    onPress={printTopBidsFromAWS}
-                  >Get Bids</Text>
-              </View>
+
           <View style={styles.tomSquare}>
               <Text style = {styles.centerTextBoth}
                 onPress={deleteBids}
@@ -194,28 +242,64 @@ function App() {
           </View>
         </View>
 
-        {/* Bid operations */}
-        <View style={{paddingBottom: 30}}></View>
+
+        {/* Other Tools */}
+        <Text style={styles.rowTitle}>Other tools</Text>
         <View style={{flexDirection: 'row'}}>
 
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBoth}
-                    onPress={() => {addGoal(goal + 500)}}
-                  >Up Goal</Text>
+                    onPress={() => {addGoal(goal * 1.5)}}
+                  >Goal + 1/2</Text>
               </View>
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBoth}
-                    onPress={() => {addIncrement(increment + 100)}}
-                  >Up Inc.</Text>
+                    onPress={() => {addGoal(goal * 2)}}
+                  >Goal + Goal</Text>
               </View>
           <View style={styles.tomSquare}>
               <Text style = {styles.centerTextBoth}
                    onPress={() => {;}}
-              >null</Text>
+              >.</Text>
           </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={() => {addIncrement(increment * 1.5)}}
+                  >Inc * 1.5</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={() => {addIncrement(increment * 0.5)}}
+                  >Inc * .5</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={() => {addIncrement(increment + 0.25)}}
+                  >Inc * .25</Text>
+              </View>
+          <View style={styles.tomSquare}>
+              <Text style = {styles.centerTextBoth}
+                   onPress={() => {;}}
+              >.</Text>
+              </View>
+          <View style={styles.tomSquare}>
+              <Text style = {styles.centerTextBoth}
+                   onPress={() => {;}}
+              >Hardset MaxBid !!!</Text>
+              </View>
         </View>
 
-        <Text onPress={() => {printTopItemFromAWS(currentItem, setCurrentItem)}} style={styles.bigText}>Get Items</Text>
+        {/* Paddle Chooser */}
+        <Text style={styles.rowTitle}>Other tools</Text>
+        <View style={{flexDirection: 'row'}}>
+        <View style={styles.tomSquare}>
+              <Text style = {styles.centerTextBoth}
+                   onPress={() => {;}}
+              >Paddle switcher !!!</Text>
+              </View>
+        </View>
+
+        {/* <Text onPress={() => {printTopItemFromAWS(currentItem, setCurrentItem)}} style={styles.bigText}>Get Items</Text> */}
 
         <Text>{
             "Max Bid:" + maxBid.user + " at " + maxBid.amount
@@ -224,11 +308,12 @@ function App() {
         <View style={{flexDirection: 'row'}}>
         <View style= {styles.bidList}>
           <Text>---All Bids---</Text>
-          {bids.map((item, i) => {
+            <Text>There are: {bids.length}</Text>
+          {/* {bids.map((item, i) => {
               return (
                 <Text key={i} >Bid Item: {item.Amount}</Text>
               )
-          }).sort(function (a,b) { return a.Amount < b.Amount })}
+          }).sort(function (a,b) { return a.Amount < b.Amount })} */}
         </View>
 
         <View style= {styles.bidList}>
@@ -444,7 +529,10 @@ const styles = StyleSheet.create({
   titleText: {fontSize: 20, color: "#000000", textAlign: 'center',  paddingBottom: 20, fontWeight: 'bold'},
   tomSquare: {fontSize: 10, backgroundColor: "#03dffc", textAlign: 'center', textAlignVertical: 'center', width: 100, height: 100, borderWidth: 3, margin: 4},
   centerTextBoth: {textAlign: 'center', textAlignVertical: 'center', paddingTop:40},
+  centerTextBothBID: {fontSize: 23, textAlign: 'center', textAlignVertical: 'center', paddingTop:35},
+
   bidList: {margin: 10, maxHeight: 200},
-  smolBean: {fontSize: 8, textAlign: 'center'},
+  smolBean: {fontSize: 18, textAlign: 'center'},
+  rowTitle: { fontSize: 20, fontWeight: 'bold', paddingTop: 20 },
 
 });
