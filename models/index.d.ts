@@ -4,6 +4,22 @@ import { ModelInit, MutableModel, PersistentModelConstructor } from "@aws-amplif
 
 
 
+export declare class Increment {
+  readonly id: string;
+  readonly Amount?: number;
+  readonly SubmittedAt?: string;
+  constructor(init: ModelInit<Increment>);
+  static copyOf(source: Increment, mutator: (draft: MutableModel<Increment>) => MutableModel<Increment> | void): Increment;
+}
+
+export declare class Goal {
+  readonly id: string;
+  readonly price?: number;
+  readonly SubmittedAt?: string;
+  constructor(init: ModelInit<Goal>);
+  static copyOf(source: Goal, mutator: (draft: MutableModel<Goal>) => MutableModel<Goal> | void): Goal;
+}
+
 export declare class Bids {
   readonly id: string;
   readonly itemID: string;

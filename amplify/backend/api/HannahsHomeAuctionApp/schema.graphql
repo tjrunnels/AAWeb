@@ -1,3 +1,15 @@
+type Increment @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  Amount: Int
+  SubmittedAt: AWSDateTime
+}
+
+type Goal @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  price: Int
+  SubmittedAt: AWSDateTime
+}
+
 type Bids @model @auth(rules: [{allow: public}]) @key(name: "byItem", fields: ["itemID"]) {
   id: ID!
   itemID: ID!
@@ -14,3 +26,4 @@ type Item @model @auth(rules: [{allow: public}]) {
   Photos: [String]
   ItemToBids: [Bids] @connection(keyName: "byItem", fields: ["id"])
 }
+ 

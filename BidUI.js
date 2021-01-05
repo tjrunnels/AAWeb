@@ -4,11 +4,11 @@ import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableO
 
 //from admin UI
 import { DataStore, Predicates } from '@aws-amplify/datastore';
-import { Item, Bids} from './models';
+import { Item, Bids, Goal, Increment} from './models';
 
 
 //from backend
-import { listBids, evaluateAllBids, evaluateOneBid, pushNewBid, anonymousCheck, setRandomItem} from './Backend'
+import { listBids, evaluateAllBids, evaluateOneBid, pushNewBid, anonymousCheck, setRandomItem, addGoal, addIncrement} from './Backend'
 
 
 import Amplify from 'aws-amplify'
@@ -37,6 +37,7 @@ const BidUI = () => {
   const [maxBid, setMaxBid] = useState(initialState)
   const [increment, setIncrement] = useState(100)
   const [currentUser, setCurrentUser] = useState()
+  const [goal, setGoal] = useState(100)
 
 
 
@@ -74,6 +75,23 @@ const BidUI = () => {
           console.log("Just recieved new item:", msg.element.Title);
           setCurrentItem(msg.element);
         }
+      })
+
+      //subscribe to goal
+      const goalSubscription = DataStore.observe(Goal).subscribe(msg => {
+        if (msg.opType == 'INSERT') {
+          console.log("Just recieved new goal:", msg.element.price);
+          setGoal(msg.element.price);
+
+        }
+      })
+      //subscribe to Increment
+      const incrementSubscription = DataStore.observe(Increment).subscribe(msg => {
+          if (msg.opType == 'INSERT') {
+            console.log("Just recieved new increment:", msg.element.Amount);
+            setIncrement(msg.element.Amount);
+
+          }
       })
 
       
@@ -139,10 +157,10 @@ const BidUI = () => {
 
     {/* Current Bid info */}
     <View style={{height:100, marginBottom:10, backgroundColor: '#fff'}}>
-            
-            <Text style={styles.bidTags}>Highest Bid:</Text> 
+            {/* tomdo: delete addGoal and addIncrement */}
+            <Text style={styles.bidTags} onPress={() => {addIncrement(increment + 100)}}>Highest Bid:</Text> 
             <Text style={styles.bidPrice}>{maxBid.amount}</Text> 
-            <Text style={styles.bidTags}>Goal: $800</Text> 
+            <Text style={styles.bidTags} onPress={() => {addGoal(goal + 500)}}>Goal: ${goal}</Text> 
     </View>
 
     {/* horizontal line */}

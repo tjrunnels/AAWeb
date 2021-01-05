@@ -8,7 +8,7 @@ import ProjectorUI from './ProjectorUI'
 
 //from admin UI
 import { DataStore, Predicates } from '@aws-amplify/datastore';
-import { Item, Bids} from './models';
+import { Item, Bids, Goal, Increment} from './models';
 
 
 import { withAuthenticator, S3Image } from 'aws-amplify-react-native'; 
@@ -16,7 +16,7 @@ import { withAuthenticator, S3Image } from 'aws-amplify-react-native';
 
 //backend functions
 import {listBids, pushNewRandomBid, evaluateAllBids, evaluateOneBid, anonymousCheck, printTopItemFromAWS,
-         setRandomItem, printTopBidsFromAWS, deleteBids, addLakeHouseItem, addFirstPitchItem } from './Backend'
+         setRandomItem, printTopBidsFromAWS, deleteBids, addLakeHouseItem, addFirstPitchItem, addGoal, addIncrement } from './Backend'
 
 
 const signUpConfig = {
@@ -66,6 +66,8 @@ function App() {
     const [bids, setBids] = useState([0]);
     const [currentItem, setCurrentItem] = useState();
     const [maxBid, setMaxBid] = useState(initialState)
+    const [goal, setGoal] = useState(800)
+    const [increment, setIncrement] = useState(100)
 
   useEffect(() => {
     listBids(setBids) 
@@ -90,6 +92,21 @@ function App() {
             console.log("Just recieved new item:", msg.element.Title);
             setCurrentItem(msg.element);
           }
+        })
+
+        const goalSubscription = DataStore.observe(Goal).subscribe(msg => {
+          if (msg.opType == 'INSERT') {
+            console.log("Just recieved new goal:", msg.element.price);
+            setGoal(msg.element.price);
+
+          }
+      })
+        const incrementSubscription = DataStore.observe(Increment).subscribe(msg => {
+            if (msg.opType == 'INSERT') {
+              console.log("Just recieved new increment:", msg.element.Amount);
+              setIncrement(msg.element.Amount);
+
+            }
         })
       }, [])
 
@@ -133,6 +150,7 @@ function App() {
         <Text style= {styles.titleText}>{currentItem == null ? "" : currentItem.Title}</Text>
         <Text>{currentItem == null ? "" : currentItem.Description}</Text>
         {currentItem == null ? <View styles={{height: 0}}/> : <Image source={{uri: currentItem.Photos[0]}} style={{ width: 300, height: 100 }}/> }
+        <Text style={styles.smolBean}>goal: {goal}, increment: {increment}</Text>
 
         {/* Changing Item */}
         <View style={{paddingBottom: 30}}></View>
@@ -173,6 +191,27 @@ function App() {
               <Text style = {styles.centerTextBoth}
                 onPress={deleteBids}
               >Delete All Bids</Text>
+          </View>
+        </View>
+
+        {/* Bid operations */}
+        <View style={{paddingBottom: 30}}></View>
+        <View style={{flexDirection: 'row'}}>
+
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={() => {addGoal(goal + 500)}}
+                  >Up Goal</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={() => {addIncrement(increment + 100)}}
+                  >Up Inc.</Text>
+              </View>
+          <View style={styles.tomSquare}>
+              <Text style = {styles.centerTextBoth}
+                   onPress={() => {;}}
+              >null</Text>
           </View>
         </View>
 
@@ -217,7 +256,7 @@ function App() {
 
 
 //tomdo: change
-export default ProjectorUI //withAuthenticator(BidUI, {includeGreetings: true});
+export default withAuthenticator(BidUI, {includeGreetings: true});
 
 
 
@@ -405,6 +444,7 @@ const styles = StyleSheet.create({
   titleText: {fontSize: 20, color: "#000000", textAlign: 'center',  paddingBottom: 20, fontWeight: 'bold'},
   tomSquare: {fontSize: 10, backgroundColor: "#03dffc", textAlign: 'center', textAlignVertical: 'center', width: 100, height: 100, borderWidth: 3, margin: 4},
   centerTextBoth: {textAlign: 'center', textAlignVertical: 'center', paddingTop:40},
-  bidList: {margin: 10, maxHeight: 200}
+  bidList: {margin: 10, maxHeight: 200},
+  smolBean: {fontSize: 8, textAlign: 'center'},
 
 });

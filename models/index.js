@@ -4,9 +4,11 @@ import { schema } from './schema';
 
 
 
-const { Bids, Item } = initSchema(schema);
+const { Increment, Goal, Bids, Item } = initSchema(schema);
 
 export {
+  Increment,
+  Goal,
   Bids,
   Item
 };

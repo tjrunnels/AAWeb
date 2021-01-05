@@ -5,7 +5,7 @@ Amplify.configure(config)
 
 //from admin UI
 import { DataStore, Predicates } from '@aws-amplify/datastore';
-import { Item, Bids} from './models';
+import { Item, Bids, Goal, Increment} from './models';
 
 
 export async function listBids(setBids) {
@@ -187,4 +187,26 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
       })
     );
     console.log("item added: Pitch");
+  }
+
+
+  export async function addGoal(amount) {
+    await DataStore.save(
+        new Goal({
+            "price": amount,
+            "SubmittedAt": new Date().toISOString()
+        })
+    );
+    console.log("Goal added");
+  }
+
+
+  export async function addIncrement(amount) {
+    await DataStore.save(
+        new Increment({
+            "Amount": amount,
+            "SubmittedAt": new Date().toISOString()
+        })
+    );
+    console.log("Increment added");
   }

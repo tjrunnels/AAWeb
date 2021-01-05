@@ -8,7 +8,7 @@ import InsetShadow from 'react-native-inset-shadow'
 import {listBids, setRandomItem, evaluateOneBid, evaluateAllBids } from './Backend'
 
 //from amazon
-import { Item, Bids} from './models';
+import { Item, Bids, Goal, Increment} from './models';
 import { DataStore } from '@aws-amplify/datastore';
 
 
@@ -30,6 +30,7 @@ const ProjectorUI = () => {
     const [currentItem, setCurrentItem] = useState(testItem); //tomdo: take out testItem
     const [maxBid, setMaxBid] = useState({amount: 0, user: ''})
     const [goal, setGoal] = useState(800)
+    const [increment, setIncrement]  = useState(10)
 
 
     let [percent, setPercent] = useState(5);
@@ -54,13 +55,27 @@ const ProjectorUI = () => {
               else if (msg.opType == 'DELETE')
                 console.log("Deleted: ", msg.element.id)
               
-            });
+            })
             const itemSubscription = DataStore.observe(Item).subscribe(msg => {
-              if (msg.opType == 'INSERT') {
-                console.log("Just recieved new item:", msg.element.Title);
-                setCurrentItem(msg.element);
+                if (msg.opType == 'INSERT') {
+                    console.log("Just recieved new item:", msg.element.Title);
+                    setCurrentItem(msg.element);
 
-              }
+                }
+            })
+            const goalSubscription = DataStore.observe(Goal).subscribe(msg => {
+                if (msg.opType == 'INSERT') {
+                  console.log("Just recieved new goal:", msg.element.price);
+                  setGoal(msg.element.price);
+  
+                }
+            })
+            const incrementSubscription = DataStore.observe(Increment).subscribe(msg => {
+                if (msg.opType == 'INSERT') {
+                  console.log("Just recieved new increment:", msg.element.Amount);
+                  setIncrement(msg.element.Amount);
+  
+                }
             })
           }, [])
 
@@ -91,7 +106,7 @@ const ProjectorUI = () => {
     }, [maxBid])
 
 
-      //for progress bar animation
+    //for progress bar animation
     useEffect(() => {
         Animated.timing(animation.current, {
         toValue: percent,
