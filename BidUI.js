@@ -10,6 +10,10 @@ import { Item, Bids, Goal, Increment} from './models';
 //from backend
 import { listBids, evaluateAllBids, evaluateOneBid, pushNewBid, anonymousCheck, setRandomItem, addGoal, addIncrement} from './Backend'
 
+//dialog box
+import DialogInput from 'react-native-dialog-input';
+
+
 
 import Amplify from 'aws-amplify'
 import config from './aws-exports'
@@ -38,6 +42,8 @@ const BidUI = () => {
   const [increment, setIncrement] = useState(100)
   const [currentUser, setCurrentUser] = useState()
   const [goal, setGoal] = useState(100)
+  const [customBidDialog, setCustomBidDialog] = useState(false)
+
 
 
 
@@ -132,7 +138,7 @@ const BidUI = () => {
 
 
 
-  
+
 
 
   //MARK: - Beginning of UI
@@ -144,6 +150,18 @@ const BidUI = () => {
             <Text style={styles.itemTitle}>{currentItem.Title}</Text>
             <Text style={styles.itemDescription}>{currentItem.Description}</Text> 
         </View>
+
+    <DialogInput isDialogVisible={customBidDialog}
+        title={"Custom Bid Amount"}
+        message={"Enter the price you want to bid"}
+        hintInput = {(maxBid.amount + increment).toString()}
+        textInputProps = {{autoCorrect: false, autoCapitalize: false, keyboardType: 'number-pad'}}
+        submitInput={ (inputText) => {
+          pushNewBid(Number.parseInt(inputText), currentItem, currentUser)
+          setCustomBidDialog(false)
+        } }
+        closeDialog={ () => {setCustomBidDialog(false)}}>
+    </DialogInput>  
 
     {/* Current Bid info */}
     <View style={{height:100, marginBottom:10, backgroundColor: '#fff'}}>

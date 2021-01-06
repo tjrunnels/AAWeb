@@ -58,6 +58,7 @@ const initialState = { amount: 0, user: '' }
   //    filters them by if they are part of the 'currentItem',
   //    and sets the 'maxBid' hook's .Amount property 
   //////////////////////////////////////////
+//tomdo:   does hardset bid need to be incoporated in evalueateALL ???
 export function evaluateAllBids(currentItem, bids, setMaxBid) {
     if(currentItem != null) {
       var id = currentItem.id
@@ -101,7 +102,7 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
   //////////////////////////////////////////
  export  function evaluateOneBid(bid, currentItem, maxBid, setMaxBid) {
     if(currentItem != null) {
-      if(bid.itemID == currentItem.id && bid.Amount > maxBid.amount) {
+      if(bid.itemID == currentItem.id && (bid.Amount > maxBid.amount || bid.Username == "HSForwardtech")) {
         setMaxBid({amount: bid.Amount, user: anonymousCheck(bid)})
         //alert(anonymousCheck(bid), " just bid ", bid.Amount)
       }

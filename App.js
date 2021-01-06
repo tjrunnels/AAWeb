@@ -71,8 +71,11 @@ function App() {
     const [maxBid, setMaxBid] = useState(initialState)
     const [goal, setGoal] = useState(800)
     const [increment, setIncrement] = useState(100)
-    const [currentPaddle, setCurrentPaddle] = useState(1)
-    const [thisDialogVisible, setThisDialogVisible] = useState(false)
+    const [hardSetBidDialog, setHardSetBidDialog] = useState(false)
+    const [customBidDialog, setCustomBidDialog] = useState(false)
+
+    const [paddles, setPaddles] = useState([0, 1, 2]) //tomdo: change initial to just 0
+    const [currentPaddle, setCurrentPaddle] = useState(0)
 
   useEffect(() => {
     listBids(setBids) 
@@ -130,6 +133,13 @@ function App() {
     return (maxBid.amount + (increment * incCount))
   }
   
+  function returnBidWithPaddleText(paddleNum) {
+      var toReturn = "Paddle #"
+      var pad = paddleNum.toString()
+      toReturn = toReturn.concat(pad)
+      //console.log("returning...", toReturn)
+      return toReturn;
+  }
 
 
 
@@ -149,6 +159,8 @@ function App() {
       return "no bids"
     }
   }
+
+
 
   return (
 
@@ -182,43 +194,65 @@ function App() {
           </View>
         </View>
 
+
+        {/* Paddle Chooser */}
+        <Text style={styles.rowTitle}>Paddles</Text>
+        <View style={{flexDirection: 'row'}}>
+          {paddles.map((item, i) => {
+              return (
+                <View key={"paddle"+i} style={(currentPaddle == paddles[i] ? styles.paddleSquareOn : styles.paddleSquareOff)}>
+                  <Text style = {styles.centerTextBoth}
+                      onPress={() => {setCurrentPaddle(paddles[i])}}
+                  >Paddle {paddles[i]}</Text>
+                </View>
+              )
+            })
+          }
+          {/* <View style={styles.tomSquare}>
+              <Text style = {styles.centerTextBoth}
+                   onPress={() => {;}}
+              >Paddle switcher !!!</Text>
+          </View> */}
+        </View>
+
+
         {/* Bid Tools */}
         <Text style={styles.rowTitle}>Bid tools</Text>
         <View style={{flexDirection: 'row'}}>
           {/* ----------------------------- bid buttons ----------------------------- */}
           <View style={styles.tomSquare}>
               <Text style = {styles.centerTextBoth}
-                   onPress={() => {;}}
-              >Custom Bid !!!</Text>
+                   onPress={() => {setCustomBidDialog(true)}}
+              >Custom Bid</Text>
               </View>
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBothBID}
-                    onPress={() => {pushNewBid((maxBid.amount + (increment * .5)),currentItem,currentPaddle)}}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * .5)),currentItem,returnBidWithPaddleText(currentPaddle))}}
                   >{(maxBid.amount + (increment * .5))}</Text>
               </View>
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBothBID}
-                    onPress={() => {pushNewBid((maxBid.amount + (increment * 1)),currentItem,currentPaddle)}}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 1)),currentItem,returnBidWithPaddleText(currentPaddle))}}
                   >..{(maxBid.amount + (increment * 1))}..</Text>
               </View>
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBothBID}
-                    onPress={() => {pushNewBid((maxBid.amount + (increment * 1.5)),currentItem,currentPaddle)}}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 1.5)),currentItem,returnBidWithPaddleText(currentPaddle))}}
                   >{(maxBid.amount + (increment * 1.5))}</Text>
               </View>
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBothBID}
-                    onPress={() => {pushNewBid((maxBid.amount + (increment * 2)),currentItem,currentPaddle)}}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 2)),currentItem,returnBidWithPaddleText(currentPaddle))}}
                   >..{(maxBid.amount + (increment * 2))}..</Text>
               </View>
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBothBID}
-                    onPress={() => {pushNewBid((maxBid.amount + (increment * 2.5)),currentItem,currentPaddle)}}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 2.5)),currentItem,returnBidWithPaddleText(currentPaddle))}}
                   >{(maxBid.amount + (increment * 2.5))}</Text>
               </View>
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBothBID}
-                    onPress={() => {pushNewBid((maxBid.amount + (increment * 3)),currentItem,currentPaddle)}}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 3)),currentItem,returnBidWithPaddleText(currentPaddle))}}
                   >..{(maxBid.amount + (increment * 3))}..</Text>
               </View>
           {/* <View style={styles.tomSquare}>
@@ -228,7 +262,7 @@ function App() {
               </View> */}
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBothBID}
-                    onPress={() => {pushNewBid((maxBid.amount + (increment * 4)),currentItem,currentPaddle)}}
+                    onPress={() => {pushNewBid((maxBid.amount + (increment * 4)),currentItem,returnBidWithPaddleText(currentPaddle))}}
                   >..{(maxBid.amount + (increment * 4))}..</Text>
               </View>
           {/* <View style={styles.tomSquare}>
@@ -288,36 +322,47 @@ function App() {
               </View>
           <View style={styles.tomSquare}>
               <Text style = {styles.centerTextBoth}
-                   onPress={() => {;}}
-              >Hardset MaxBid !!!</Text>
+                   onPress={() => {setHardSetBidDialog(true);}}
+              >Hardset MaxBid</Text>
               </View>
         </View>
 
-        {/* Paddle Chooser */}
-        <Text style={styles.rowTitle}>Other tools</Text>
-        <View style={{flexDirection: 'row'}}>
-          <View style={styles.tomSquare}>
-              <Text style = {styles.centerTextBoth}
-                   onPress={() => {setThisDialogVisible(true)}}
-              >Paddle switcher !!!</Text>
-          </View>
-        </View>
+        
+
 
         {/* <Text onPress={() => {printTopItemFromAWS(currentItem, setCurrentItem)}} style={styles.bigText}>Get Items</Text> */}
         
-        <DialogInput isDialogVisible={thisDialogVisible}
-            title={"DialogInput 1"}
-            message={"Message for DialogInput #1"}
+
+        {/* dialog boxes */}
+        <DialogInput isDialogVisible={hardSetBidDialog}
+            title={"Hard Set Max Bid"}
+            message={"Enter the price you want to set the max bid to"}
             hintInput = {(maxBid.amount + increment).toString()}
             textInputProps = {{autoCorrect: false, autoCapitalize: false, keyboardType: 'number-pad'}}
-            submitInput={ (inputText) => {console.log(inputText); setThisDialogVisible(false)} }
-            closeDialog={ () => {setThisDialogVisible(false)}}>
+            submitInput={ (inputText) => {
+              console.log(inputText)
+              pushNewBid(Number.parseInt(inputText), currentItem, "HSForwardtech")
+              setHardSetBidDialog(false)
+            } }
+            closeDialog={ () => {setHardSetBidDialog(false)}}>
+        </DialogInput>    
+
+        <DialogInput isDialogVisible={customBidDialog}
+            title={"Custom Bid Amount"}
+            message={"Enter the price you want to bid"}
+            hintInput = {(maxBid.amount + increment).toString()}
+            textInputProps = {{autoCorrect: false, autoCapitalize: false, keyboardType: 'number-pad'}}
+            submitInput={ (inputText) => {
+              pushNewBid(Number.parseInt(inputText), currentItem, returnBidWithPaddleText(currentPaddle))
+              setCustomBidDialog(false)
+            } }
+            closeDialog={ () => {setCustomBidDialog(false)}}>
         </DialogInput>    
 
 
-        <Text>{
+        {/* <Text>{
             "Max Bid:" + maxBid.user + " at " + maxBid.amount
-        }</Text>
+        }</Text> */}
 
         <View style={{flexDirection: 'row'}}>
         <View style= {styles.bidList}>
@@ -548,5 +593,9 @@ const styles = StyleSheet.create({
   bidList: {margin: 10, maxHeight: 200},
   smolBean: {fontSize: 18, textAlign: 'center'},
   rowTitle: { fontSize: 20, fontWeight: 'bold', paddingTop: 20 },
+
+  paddleSquareOn:    {fontSize: 10, backgroundColor: "#6cba96", textAlign: 'center', textAlignVertical: 'center', width: 100, height: 100, borderWidth: 3, margin: 4},
+  paddleSquareOff:   {fontSize: 10, backgroundColor: "#bd766a", textAlign: 'center', textAlignVertical: 'center', width: 100, height: 100, borderWidth: 3, margin: 4},
+
 
 });
