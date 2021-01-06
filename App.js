@@ -217,21 +217,21 @@ function App() {
                     onPress={() => {pushNewBid((maxBid.amount + (increment * 3)),currentItem,currentPaddle)}}
                   >..{(maxBid.amount + (increment * 3))}..</Text>
               </View>
-          <View style={styles.tomSquare}>
+          {/* <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBothBID}
                     onPress={() => {pushNewBid((maxBid.amount + (increment * 3.5)),currentItem,currentPaddle)}}
                   >{(maxBid.amount + (increment * 3.5))}</Text>
-              </View>
+              </View> */}
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBothBID}
                     onPress={() => {pushNewBid((maxBid.amount + (increment * 4)),currentItem,currentPaddle)}}
                   >..{(maxBid.amount + (increment * 4))}..</Text>
               </View>
-          <View style={styles.tomSquare}>
+          {/* <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBothBID}
                     onPress={() => {pushNewBid((maxBid.amount + (increment * 4.5)),currentItem,currentPaddle)}}
                   >{(maxBid.amount + (increment * 4.5))}</Text>
-              </View>
+              </View> */}
           {/* ----------------------------- bid buttons ----------------------------- */}
 
 
@@ -265,17 +265,17 @@ function App() {
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBoth}
                     onPress={() => {addIncrement(increment * 1.5)}}
-                  >Inc * 1.5</Text>
+                  >Inc {(increment * 1.5)}</Text>
               </View>
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBoth}
                     onPress={() => {addIncrement(increment * 0.5)}}
-                  >Inc * .5</Text>
+                  >Inc {(increment * 0.5)}</Text>
               </View>
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBoth}
                     onPress={() => {addIncrement(increment + 0.25)}}
-                  >Inc * .25</Text>
+                  >Inc {(increment * 0.25)}</Text>
               </View>
           <View style={styles.tomSquare}>
               <Text style = {styles.centerTextBoth}
