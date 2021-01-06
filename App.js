@@ -10,6 +10,9 @@ import ProjectorUI from './ProjectorUI'
 import { DataStore, Predicates } from '@aws-amplify/datastore';
 import { Item, Bids, Goal, Increment} from './models';
 
+//dialog box
+import DialogInput from 'react-native-dialog-input';
+
 
 import { withAuthenticator, S3Image } from 'aws-amplify-react-native'; 
 
@@ -69,6 +72,7 @@ function App() {
     const [goal, setGoal] = useState(800)
     const [increment, setIncrement] = useState(100)
     const [currentPaddle, setCurrentPaddle] = useState(1)
+    const [thisDialogVisible, setThisDialogVisible] = useState(false)
 
   useEffect(() => {
     listBids(setBids) 
@@ -292,14 +296,24 @@ function App() {
         {/* Paddle Chooser */}
         <Text style={styles.rowTitle}>Other tools</Text>
         <View style={{flexDirection: 'row'}}>
-        <View style={styles.tomSquare}>
+          <View style={styles.tomSquare}>
               <Text style = {styles.centerTextBoth}
-                   onPress={() => {;}}
+                   onPress={() => {setThisDialogVisible(true)}}
               >Paddle switcher !!!</Text>
-              </View>
+          </View>
         </View>
 
         {/* <Text onPress={() => {printTopItemFromAWS(currentItem, setCurrentItem)}} style={styles.bigText}>Get Items</Text> */}
+        
+        <DialogInput isDialogVisible={thisDialogVisible}
+            title={"DialogInput 1"}
+            message={"Message for DialogInput #1"}
+            hintInput = {(maxBid.amount + increment).toString()}
+            textInputProps = {{autoCorrect: false, autoCapitalize: false, keyboardType: 'number-pad'}}
+            submitInput={ (inputText) => {console.log(inputText); setThisDialogVisible(false)} }
+            closeDialog={ () => {setThisDialogVisible(false)}}>
+        </DialogInput>    
+
 
         <Text>{
             "Max Bid:" + maxBid.user + " at " + maxBid.amount
