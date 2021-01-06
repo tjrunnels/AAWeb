@@ -19,7 +19,7 @@ import { withAuthenticator, S3Image } from 'aws-amplify-react-native';
 
 //backend functions
 import {listBids, pushNewRandomBid, evaluateAllBids, evaluateOneBid, anonymousCheck, printTopItemFromAWS,
-         setRandomItem, printTopBidsFromAWS, deleteBids, addLakeHouseItem, addFirstPitchItem, addGoal, addIncrement, pushNewBid } from './Backend'
+         setRandomItem, printTopBidsFromAWS, deleteBids, addLakeHouseItem, addFirstPitchItem, addGoal, addIncrement, pushNewBid, addNewItem } from './Backend'
 
 
 const signUpConfig = {
@@ -56,6 +56,29 @@ const signUpConfig = {
   ],
 }
 
+//-------------------------------------------------------------
+//------------------    ITEMS
+//-------------------------------------------------------------
+const KingsmillItem = new Item({
+  "Title": "Kingmill Resort Stay",
+  "Description": "When it comes to Kingsmill, we're not just another resort. We're like another world nestled into Williamsburg, Virginia—a top golf and spa destination. With our unparalleled range of accommodations, stunning James River setting, three must-play championship golf courses (one with exclusive access for The Club at Kingsmill members) and a boundless range of recreational activities and leisure pursuits—including tennis—right on the grounds, Kingsmill is a relaxing, fun, and memorable luxury waterfront escape. 3 days 2 night stay, unlimited golf, round trip airfare: $1500 Value ",
+  "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/kingsmill.jpg"],
+  "ItemToBids": []
+})
+const KingsmillGoal = 1700;
+const KingsmillIncrement = 100;
+const Kingsmill = {
+  item: KingsmillItem,
+  goal: KingsmillGoal,
+  increment: KingsmillIncrement
+}
+
+
+
+
+
+
+
 // async function listBids(setBids) {
 //   const thisbids = await DataStore.query(Bids, Predicates.ALL)
 //   setBids(thisbids);
@@ -77,10 +100,13 @@ function App() {
     const [paddles, setPaddles] = useState([0, 1, 2]) //tomdo: change initial to just 0
     const [currentPaddle, setCurrentPaddle] = useState(0)
 
+    const [getItemData, setItemData] = useState([]);
+
   useEffect(() => {
     listBids(setBids) 
-    
-    
+
+
+        setItemData([Kingsmill,Kingsmill])
         console.log("useEffect for [] running... note: should happen just once")
         const bidSubscription = DataStore.observe(Bids).subscribe(msg => {
           listBids(setBids)
@@ -122,6 +148,15 @@ function App() {
     useEffect(() => {
       evaluateAllBids(currentItem, bids, setMaxBid)
     }, [currentItem])
+
+    // useEffect(() => {
+    //   console.log("datalenght", getItemData.length)
+    //   if(getItemData.length > 0) {
+    //     for (data in getItemData) {
+    //       console.log(data.item.Title, data.goal, data.increment)
+    //     }
+    //   }
+    // }, [getItemData])
 
      //bids effect
      useEffect(() => {
@@ -186,12 +221,24 @@ function App() {
                     onPress={() => {addFirstPitchItem(); addGoal(1600); addIncrement(200); }}
                   >FirstPitch</Text>
           </View>
+                 
 
+          {getItemData.map((data, i) => {
+              return (
+                <View key={"item" + i} style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={() => {addNewItem(data.item); addGoal(data.goal); addIncrement(data.increment); }}
+                  >{data.item.Title}</Text>
+                </View>
+              )
+            })
+          }
           <View style={styles.tomSquare}>
               <Text style = {styles.centerTextBoth}
                 onPress={() => {setRandomItem(setCurrentItem)}}
               >Random Item</Text>
           </View>
+
         </View>
 
 
@@ -400,7 +447,7 @@ function App() {
 
 
 //tomdo: change
-export default App //withAuthenticator(BidUI, {includeGreetings: true});
+export default ProjectorUI //withAuthenticator(BidUI, {includeGreetings: true});
 
 
 

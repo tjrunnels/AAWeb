@@ -34,7 +34,8 @@ const ProjectorUI = () => {
 
 
     let [percent, setPercent] = useState(5);
-    let animation = useRef(new Animated.Value(0));
+    let pBarWidthAnimation = useRef(new Animated.Value(0));
+    let shadowWidthAnimation = useRef(new Animated.Value(0));
 
 
 
@@ -83,7 +84,7 @@ const ProjectorUI = () => {
     //currentItem effect
     useEffect(() => {
         evaluateAllBids(currentItem, bids, setMaxBid)
-        //update goal
+        //update goal?
     }, [currentItem])
   
     //bids effect
@@ -91,34 +92,61 @@ const ProjectorUI = () => {
         evaluateOneBid(bids[bids.length - 1], currentItem, maxBid,setMaxBid)
     }, [bids])
 
+
+    //bids effect
+    useEffect(() => {
+        updateBarWidths()
+    }, [goal])
+
     
     var shadowWidth =  ''.concat((100-percent).toFixed(2), '%')
     var shadowMargin =  ''.concat((percent).toFixed(2), '%')     
-
-    //maxbid effect
-    useEffect(() => {
+    
+    function updateBarWidths () {
         let temp = ((maxBid.amount/goal) * 100) //tomdo: change 800 to goal 
         if(temp < 5) { temp = 5}
         setPercent(temp)
-        shadowWidth =  ''.concat((100-percent).toFixed(2), '%')
-        shadowMargin =  ''.concat((percent).toFixed(2), '%')
+        shadowWidth = ''.concat((100-percent).toFixed(2), '%')
+        shadowMargin =   ''.concat((percent).toFixed(2), '%')
+    }
+
+    //maxbid effect
+    useEffect(() => {
+        updateBarWidths()
         console.log("ProjectorUI: useEffect for maxBid run")
     }, [maxBid])
 
 
     //for progress bar animation
     useEffect(() => {
-        Animated.timing(animation.current, {
-        toValue: percent,
-        duration: 300
-        }).start();
+        Animated.timing(pBarWidthAnimation.current, {
+            toValue: percent,
+            duration: 300
+            }).start();
+
+        var temp = (100 - percent)
+        Animated.timing(shadowWidthAnimation.current, {
+            toValue: temp,
+            duration: 300
+            }).start();
+        console.log("bar", pBarWidthAnimation.current)
+        console.log("shad", shadowWidthAnimation.current)
     },[percent])
 
-    let pBarWidth = animation.current.interpolate({
+    let pBarWidth = pBarWidthAnimation.current.interpolate({
         inputRange: [0, 100],
         outputRange: ["0%", "100%"],
         extrapolate: "clamp"
     })
+    
+    let pShadowWidth = shadowWidthAnimation.current.interpolate({
+        inputRange: [0, 100],
+        outputRange: ["0%", "100%"],
+        extrapolate: "clamp"
+    })
+    
+
+
 
 
 
@@ -149,6 +177,10 @@ const ProjectorUI = () => {
                         <Text style={styles.progressBarText}>${maxBid.amount}</Text>
                     </Animated.View>
                 </View>
+                
+
+                {/* tomdo thursday: this needs to be in an animated view */}
+
                 <InsetShadow left={false} right={false} bottom={false} shadowRadius={20} shadowOpacity={.60} containerStyle={{width: shadowWidth, height: '100%',position: 'absolute', left: 0, top: 0, marginLeft: shadowMargin, borderTopRightRadius: 60, borderBottomRightRadius: 60,  }}>
                     <View></View>
                 </InsetShadow>
@@ -166,7 +198,6 @@ const ProjectorUI = () => {
     );
 }
 export default ProjectorUI
-
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 20, backgroundColor: "#ffffff" },

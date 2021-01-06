@@ -190,6 +190,11 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
     console.log("item added: Pitch");
   }
 
+  export async function addNewItem(thisItem) {
+    await DataStore.save(thisItem);
+    console.log("item added: ", thisItem.Title);
+  }
+
 
   export async function addGoal(amount) {
     await DataStore.save(
