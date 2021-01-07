@@ -5,11 +5,12 @@ import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableO
 import InsetShadow from 'react-native-inset-shadow'
 
 //from backend 
-import {listBids, setRandomItem, evaluateOneBid, evaluateAllBids } from './Backend'
+import {listBids, setRandomItem, evaluateOneBid, evaluateAllBids, addGoal } from './Backend'
 
 //from amazon
 import { Item, Bids, Goal, Increment} from './models';
 import { DataStore } from '@aws-amplify/datastore';
+import { set } from 'react-native-reanimated';
 
 
 
@@ -35,7 +36,7 @@ const ProjectorUI = () => {
 
     let [percent, setPercent] = useState(5);
     let pBarWidthAnimation = useRef(new Animated.Value(0));
-    let shadowWidthAnimation = useRef(new Animated.Value(0));
+    let [pBarStyle, setPBarStyle] = useState({color: '#377be6', radius: 0})
 
 
 
@@ -98,17 +99,7 @@ const ProjectorUI = () => {
         updateBarWidths()
     }, [goal])
 
-    
-    var shadowWidth =  ''.concat((100-percent).toFixed(2), '%')
-    var shadowMargin =  ''.concat((percent).toFixed(2), '%')     
-    
-    function updateBarWidths () {
-        let temp = ((maxBid.amount/goal) * 100) //tomdo: change 800 to goal 
-        if(temp < 5) { temp = 5}
-        setPercent(temp)
-        shadowWidth = ''.concat((100-percent).toFixed(2), '%')
-        shadowMargin =   ''.concat((percent).toFixed(2), '%')
-    }
+
 
     //maxbid effect
     useEffect(() => {
@@ -116,6 +107,11 @@ const ProjectorUI = () => {
         console.log("ProjectorUI: useEffect for maxBid run")
     }, [maxBid])
 
+    function updateBarWidths () {
+        let pCent = ((maxBid.amount/goal) * 100) 
+        if(pCent < 5) { pCent = 5}
+        setPercent(pCent)
+    }
 
     //for progress bar animation
     useEffect(() => {
@@ -124,14 +120,14 @@ const ProjectorUI = () => {
             duration: 300
             }).start();
 
-        var temp = (100 - percent)
-        Animated.timing(shadowWidthAnimation.current, {
-            toValue: temp,
-            duration: 300
-            }).start();
-        console.log("bar", pBarWidthAnimation.current)
-        console.log("shad", shadowWidthAnimation.current)
+        if(percent >= 100)        //green and rounded
+            setPBarStyle({color:"#42f593", radius: 60})
+        else if (percent > 98)  //blue and rounded
+            setPBarStyle({color:"#377be6", radius: 60})
+        else                    //blue and flat (normal)
+            setPBarStyle({color:"#377be6", radius: 0})
     },[percent])
+
 
     let pBarWidth = pBarWidthAnimation.current.interpolate({
         inputRange: [0, 100],
@@ -139,17 +135,6 @@ const ProjectorUI = () => {
         extrapolate: "clamp"
     })
     
-    let pShadowWidth = shadowWidthAnimation.current.interpolate({
-        inputRange: [0, 100],
-        outputRange: ["0%", "100%"],
-        extrapolate: "clamp"
-    })
-    
-
-
-
-
-
 
     return (
         <View style={styles.container}>
@@ -161,33 +146,28 @@ const ProjectorUI = () => {
                     <Text style={styles.itemDescription}>{currentItem.Description}</Text> 
                 </View>
 
-            {/* Current Bid info
-                <View style={{height:100, margin:100, backgroundColor: '#fff'}}>
-                        
-                        <Text style={styles.bidTags}>Highest Bid:</Text> 
-                        <Text style={styles.bidPrice}>$110</Text> 
-                        <Text style={styles.bidTags}>Goal: $800</Text> 
-                </View> */}
-            
+            {/* Progress Bar */}
             <View style={styles.progressBar}>
               
-
-                <View style={styles.progressBarBackground}>
-                    <Animated.View style={[StyleSheet.absoluteFill], {backgroundColor: '#377be6', width: pBarWidth, borderTopLeftRadius: 60, borderBottomLeftRadius: 60 }}>
-                        <Text style={styles.progressBarText}>${maxBid.amount}</Text>
-                    </Animated.View>
-                </View>
+                <View style={styles.progressBarBackground}></View>
                 
-
-                {/* tomdo thursday: this needs to be in an animated view */}
-
-                <InsetShadow left={false} right={false} bottom={false} shadowRadius={20} shadowOpacity={.60} containerStyle={{width: shadowWidth, height: '100%',position: 'absolute', left: 0, top: 0, marginLeft: shadowMargin, borderTopRightRadius: 60, borderBottomRightRadius: 60,  }}>
+                <InsetShadow left={false} right={false} bottom={false} shadowRadius={20} shadowOpacity={.60} containerStyle={{width: '100%', padding: 40, height: '100%',position: 'absolute', left: 0, top: 0, borderTopRightRadius: 60, borderBottomRightRadius: 60, borderTopLeftRadius: 60,  }}>
                     <View></View>
                 </InsetShadow>
+
+                <Animated.View style={[StyleSheet.absoluteFill], {backgroundColor: pBarStyle.color, width: pBarWidth, borderTopLeftRadius: 60, borderBottomLeftRadius: 60,  height: '100%', borderTopRightRadius: pBarStyle.radius, borderBottomRightRadius: pBarStyle.radius}}>
+                        <Text style={styles.progressBarText}>${maxBid.amount}</Text>
+                </Animated.View>
             </View>
 
-            <Text style={styles.goalText}>Goal: ${goal}</Text>
-            
+
+
+
+            {/* Goal Text */}
+            <Text style={styles.goalText} onPress={() => {addGoal(goal + 200); setPBarStyle({color:"#42f593", radius: 60})}}>Goal: ${goal}</Text>
+
+
+            {/* Images */}
             <View style={styles.imageView}>
                 <Image source={{uri: currentItem.Photos[0]}} style={styles.imageStyle}/> 
                 <Image source={{uri: "https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/logCabinImageDemo.jpeg"}} style={styles.imageStyle}/> 
