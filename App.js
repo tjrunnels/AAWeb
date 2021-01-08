@@ -5,6 +5,7 @@ import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableO
 //from my code
 import BidUI from './BidUI'
 import ProjectorUI from './ProjectorUI'
+import MobileApp from './Mobile'
 
 //from admin UI
 import { DataStore, Predicates } from '@aws-amplify/datastore';
@@ -14,7 +15,7 @@ import { Item, Bids, Goal, Increment} from './models';
 import DialogInput from 'react-native-dialog-input';
 
 
-import { withAuthenticator, S3Image } from 'aws-amplify-react-native'; 
+import { withAuthenticator, S3Image, AmplifyTheme } from 'aws-amplify-react-native'; 
 
 
 //backend functions
@@ -22,7 +23,7 @@ import {listBids, pushNewRandomBid, evaluateAllBids, evaluateOneBid, anonymousCh
          setRandomItem, printTopBidsFromAWS, deleteBids, addLakeHouseItem, addFirstPitchItem, addGoal, addIncrement, pushNewBid, addNewItem } from './Backend'
 
 
-const signUpConfig = {
+const signUpConfigOLD = {
   hideAllDefaults: true,
   signUpFields: [
     {
@@ -55,6 +56,12 @@ const signUpConfig = {
     },
   ],
 }
+
+const signInConfig = {
+  header: "Welcome to the Hannah's Home Auction App.  Please Sign Up for an account or Sign In to one you have already made"
+}
+
+
 
 //-------------------------------------------------------------
 //------------------    ITEMS
@@ -445,9 +452,25 @@ function App() {
   );
 }
 
+//https://github.com/aws-amplify/amplify-js/blob/main/packages/aws-amplify-react-native/src/AmplifyTheme.ts
+//use that link to know what you can effect 
 
-//tomdo: change
-export default ProjectorUI //withAuthenticator(BidUI, {includeGreetings: true});
+//OR if you want to manually change stuff (like the "Sign in to your account" text) just edit the files manually
+// (like at file location: /Users/tomrunnels/Documents/Development/aamobile/node_modules/aws-amplify-react-native/dist/Auth/SignIn.js) 
+const MyTheme = Object.assign({}, AmplifyTheme, {
+
+  // button: {
+  //   backgroundColor: '#eee333',
+  //   alignItems: 'center',
+  //   padding: 16,
+  // },
+
+});
+
+
+
+export default  withAuthenticator (BidUI);
+
 
 
 
