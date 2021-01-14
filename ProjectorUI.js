@@ -5,7 +5,7 @@ import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableO
 import InsetShadow from 'react-native-inset-shadow'
 
 //from backend 
-import {listBids, setRandomItem, evaluateOneBid, evaluateAllBids, addGoal } from './Backend'
+import {listBids, setRandomItem, evaluateOneBid, evaluateAllBids, addGoal, pushNewBid } from './Backend'
 
 //from amazon
 import { Item, Bids, Goal, Increment} from './models';
@@ -32,13 +32,63 @@ const ProjectorUI = () => {
     const [maxBid, setMaxBid] = useState({amount: 0, user: ''})
     const [goal, setGoal] = useState(800)
     const [increment, setIncrement]  = useState(10)
+    const [bidderPopups, setBidderPopups] = useState([])
 
 
     let [percent, setPercent] = useState(5);
     let pBarWidthAnimation = useRef(new Animated.Value(0));
     let [pBarStyle, setPBarStyle] = useState({color: '#377be6', radius: 0})
 
+    const[ popImage, setPopImage] = useState(require("./PopImages/popOnce.gif"))
 
+    let springAnimation = useRef(new Animated.Value(0));
+    let fadeAnimation = useRef(new Animated.Value(0));
+
+
+    function fadeIn() {
+        Animated.timing(springAnimation.current, {
+          toValue: 1,
+          duration: 400
+        }).start();
+      };
+    
+    function fadeOut() {
+        Animated.timing(springAnimation.current, {
+          toValue: 0,
+          duration: 700
+        }).start();
+      };
+    
+    function springIn() {
+        var spring_config = {tension: 2, friction: 3,}
+        Animated.spring(springAnimation.current, {
+            ...spring_config,
+            toValue: 4
+        }).start()
+
+        var goaway = setTimeout(() => {
+            fadeOut()
+        }, 4000)
+    }
+
+    function showBidder(username) {
+       var popLeft = Math.random() * 40    //small variance 
+       if(Math.random() > .5) 
+            popLeft += 3     //left or right side of screen
+
+       var popTop = (Math.random() * 150)// + 50 //top variance plus offset
+
+       var popStyle = {
+        // position: 'absolute',
+        // transform: [{scale: springAnimation.current}],
+        left: popLeft,
+        top: popTop,
+       }
+
+        var bidderPopup = {username, popStyle }
+        springIn()
+        setBidderPopups([...bidderPopups, bidderPopup])
+    }
 
     useEffect(() => {
         listBids(setBids) 
@@ -79,8 +129,16 @@ const ProjectorUI = () => {
   
                 }
             })
+
           }, [])
 
+
+    function setOffPop() {
+        if(popImage == require("./PopImages/popOnce.gif"))
+            setPopImage(require("./PopImages/popOnce2.gif"))
+        else
+            setPopImage(require("./PopImages/popOnce.gif"))
+    }
 
     //currentItem effect
     useEffect(() => {
@@ -115,18 +173,27 @@ const ProjectorUI = () => {
 
     //for progress bar animation
     useEffect(() => {
+  
+        if(percent >= 100) {
+            percent = 100
+            setPBarStyle({color:"#42f593", radius: 60})  //green and rounded
+            setOffPop()
+        }          
+        else if (percent > 98)  //blue and rounded
+            setPBarStyle({color:"#377be6", radius: 60})
+        else                    //blue and flat (normal)
+            setPBarStyle({color:"#377be6", radius: 0})
+
+
         Animated.timing(pBarWidthAnimation.current, {
             toValue: percent,
             duration: 300
             }).start();
 
-        if(percent >= 100)        //green and rounded
-            setPBarStyle({color:"#42f593", radius: 60})
-        else if (percent > 98)  //blue and rounded
-            setPBarStyle({color:"#377be6", radius: 60})
-        else                    //blue and flat (normal)
-            setPBarStyle({color:"#377be6", radius: 0})
     },[percent])
+    
+
+
 
 
     let pBarWidth = pBarWidthAnimation.current.interpolate({
@@ -136,14 +203,30 @@ const ProjectorUI = () => {
     })
     
 
+    
+    const fadeContainer = {
+        position: 'absolute',
+        transform: [{scale: springAnimation.current}],
+    }
     return (
         <View style={styles.container}>
+            <Image source={popImage} style= {styles.popImage}/>
+
+            <Animated.View style={fadeContainer} >
+                 <Text style={styles.fadeText}>Hi!</Text>
+            </Animated.View>
+
+            {bidderPopups.map((item,i) => {
+                <Animated.View style={[fadeContainer, item.popStyle]} id="i">
+                    <Text style={styles.fadeText}>{item.username}</Text>
+                </Animated.View>
+            })}
 
             {/* Item info */}
-                <View style={{height:150, marginBottom:0, backgroundColor: '#fff', width: 850, alignSelf: 'center', marginBottom: 200, marginTop: 30}}>
+                <View style={{height:160, marginBottom:0, backgroundColor: '#fff', width: 900, alignSelf: 'center', marginBottom: 200, marginTop: 30}}>
                     <Text style={styles.itemDescription}>Current Auction</Text> 
                     <Text style={styles.itemTitle} onPress={() => {setRandomItem(setCurrentItem)}}>{currentItem.Title}</Text>
-                    <Text style={styles.itemDescription}>{currentItem.Description}</Text> 
+                    <Text style={styles.itemDescription} onPress={() => {pushNewBid(100,currentItem,'test');}}>{currentItem.Description}</Text> 
                 </View>
 
             {/* Progress Bar */}
@@ -156,15 +239,16 @@ const ProjectorUI = () => {
                 </InsetShadow>
 
                 <Animated.View style={[StyleSheet.absoluteFill], {backgroundColor: pBarStyle.color, width: pBarWidth, borderTopLeftRadius: 60, borderBottomLeftRadius: 60,  height: '100%', borderTopRightRadius: pBarStyle.radius, borderBottomRightRadius: pBarStyle.radius}}>
-                        <Text style={styles.progressBarText}>${maxBid.amount}</Text>
+                        {(maxBid.amount > 99 && percent < 6) ? <Text style={[styles.progressBarText, {fontSize: 30, marginTop: 20}]}>${maxBid.amount}</Text> :  <Text style={styles.progressBarText}>${maxBid.amount}</Text>}
                 </Animated.View>
             </View>
 
 
+            <Text style={[styles.itemDescription, {margin: -10}]} onPress={() => {;}}>Current Winner: {maxBid.user}</Text>
 
 
             {/* Goal Text */}
-            <Text style={styles.goalText} onPress={() => {addGoal(goal + 200); setPBarStyle({color:"#42f593", radius: 60})}}>Goal: ${goal}</Text>
+            <Text style={styles.goalText} onPress={() => {addGoal(goal + 200); setOffPop(); console.log(springAnimation); showBidder('tommyboy');}}>Goal: ${goal}</Text>
 
 
             {/* Images */}
@@ -212,6 +296,9 @@ const styles = StyleSheet.create({
     buttonTags:         { fontSize: 15, color: '#7c838f', textAlign: 'center', marginTop: 5},
     buttonView:         { marginBottom: 5},
 
+    popImage: { width: 500, height: 500, position: 'absolute', left: 1550 , top: 230 },
+
+    fadeText: { color: "#377be6"},
 
   })
   

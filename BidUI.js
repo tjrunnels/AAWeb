@@ -8,7 +8,7 @@ import { Item, Bids, Goal, Increment} from './models';
 
 
 //from backend
-import { listBids, evaluateAllBids, evaluateOneBid, pushNewBid, anonymousCheck, setRandomItem, addGoal, addIncrement} from './Backend'
+import { listBids, listItems, listGoals, listIncrements, evaluateAllBids, evaluateOneBid, pushNewBid, anonymousCheck, setRandomItem, addGoal, addIncrement} from './Backend'
 
 //dialog box
 import DialogInput from 'react-native-dialog-input';
@@ -20,6 +20,7 @@ import config from './aws-exports'
 Amplify.configure(config)
 
 import { Auth } from 'aws-amplify';
+import HelpUI from './HelpUI';
 
 
 //inital state and basically declaration of maxBid variable
@@ -29,7 +30,7 @@ const initialState = { amount: 0, user: '' }
 //tomdo: delete.  for testing
 var testItem = new Item({
   "Title": "Test Item",
-  "Description": "Ever wondered what the sunset looks like offshore?  Well you can find out with this exclusive boat excursion.  Just you, a guest, and the captain will sail out an hour before sunset and come back in 30 minutes after, drinks included.",
+  "Description": "Ever wondered what the sunset looks like offshore?  Well you can find out with this exclusive boat excursion.  Just you, a guest, and the captain will sail out an hour before sunset and come back in 30 minutes after.",
   "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/baseball.jpg"],
   "ItemToBids": []
 })
@@ -37,12 +38,18 @@ var testItem = new Item({
 const BidUI = () => {
 
   const [bids, setBids] = useState([]);
+  const [items, setItems] = useState([]);
+  const [goals, setGoals] = useState([]);
+  const [increments, setIncrements] = useState([])
   const [currentItem, setCurrentItem] = useState(testItem);   //tomdo: change tomItem to null
   const [maxBid, setMaxBid] = useState(initialState)
   const [increment, setIncrement] = useState(100)
   const [currentUser, setCurrentUser] = useState()
   const [goal, setGoal] = useState(100)
   const [customBidDialog, setCustomBidDialog] = useState(false)
+  const [helpOverlay, setHelpOverlay] = useState(false)
+
+
 
 
 
@@ -58,6 +65,10 @@ const BidUI = () => {
 
       //get the initial list of Bids from AWS
       listBids(setBids) 
+      // listItems(setItems)
+      // listGoals(setGoals)
+      // listIncrements(setIncrements)
+
 
       //subscribe to Bids
       console.log('subscribing....')
@@ -105,11 +116,9 @@ const BidUI = () => {
       Auth.currentAuthenticatedUser().then(user => setCurrentUser(user.username));
       
 
-
-
   }, [])
 
-    
+ 
       
   //////////////////////////////////////////
   //    currentItem effect
@@ -134,8 +143,12 @@ const BidUI = () => {
 
 
 
-
-
+  const hightestBidderColorSwapStyle  = {
+    color: maxBid.user == currentUser ? '#34c776' : null,
+  }
+  const hightestBidderBackgroundColorSwapStyle  = {
+    backgroundColor: maxBid.user == currentUser ? '#34c776' : '#377be6',
+  }
 
 
 
@@ -145,8 +158,25 @@ const BidUI = () => {
   return (
   <View style={styles.container}>
 
+
+    <TouchableOpacity style={styles.helpIcon}  onPress={() => {setHelpOverlay(!helpOverlay)}}>
+      <Image style={{width: 35, height: 35}} source={require('./helpIcon.png')}></Image>
+    </TouchableOpacity>
+    {helpOverlay ? 
+    <HelpUI>
+      <TouchableOpacity style={styles.helpCloseButton} onPress={() => { setHelpOverlay(false) }}>
+            <Text style={styles.helpButtonText}>Close</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.helpSignoutButton} onPress={() => { Auth.signOut().then(data => console.log(data)); setHelpOverlay(false) }}>
+            <Text style={styles.helpSignoutText}>Sign Out of {Auth.user.username}</Text>
+      </TouchableOpacity>
+    </HelpUI>
+    : null}
+
+
+
     {/* Item info */}
-        <View style={{height:150, marginBottom:30, backgroundColor: '#fff'}}>
+        <View style={{height:150, marginBottom:30, backgroundColor: '#fff'}}>  
             <Text style={styles.itemTitle}>{currentItem.Title}</Text>
             <Text style={styles.itemDescription}>{currentItem.Description}</Text> 
         </View>
@@ -166,38 +196,38 @@ const BidUI = () => {
     {/* Current Bid info */}
     <View style={{height:100, marginBottom:10, backgroundColor: '#fff'}}>
             {/* tomdo: delete addGoal and addIncrement */}
-            <Text style={styles.bidTags} onPress={() => {addIncrement(increment + 100)}}>Highest Bid:</Text> 
-            <Text style={styles.bidPrice}>{maxBid.amount}</Text> 
+            <Text style={[styles.bidTags, hightestBidderColorSwapStyle]} onPress={() => {addIncrement(increment + 100)}}>{maxBid.user == currentUser? "You are the Highest Bidder" : "Highest Bid:"}</Text> 
+            <Text style={[styles.bidPrice, hightestBidderColorSwapStyle]}>{maxBid.amount}</Text> 
             <Text style={styles.bidTags} onPress={() => {addGoal(goal + 500)}}>Goal: ${goal}</Text> 
     </View>
 
     {/* horizontal line */}
-    <View style={{borderBottomColor: '#bcc2cc', borderBottomWidth: 1, margin: 20}}/>
+    <View style={{borderBottomColor: '#bcc2cc', borderBottomWidth: 1, margin: 10}}/>
 
     <View> 
-        <View style={styles.buttonView}>
-          <TouchableOpacity style={styles.buttons} onPress={() => { pushNewBid(((maxBid.amount) + increment), currentItem, currentUser) }}>
+        <View style={[styles.buttonView, hightestBidderColorSwapStyle]}>
+          <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => { pushNewBid(((maxBid.amount) + increment), currentItem, currentUser) }}>
             <Text style={styles.buttonsText}>Bid: ${maxBid.amount + increment}</Text>
           </TouchableOpacity>
           <Text style={styles.buttonTags}>Increase Bid by +{increment}</Text>
         </View>
 
         <View style={styles.buttonView}>
-          <TouchableOpacity style={styles.buttons} onPress={() => { pushNewBid((maxBid.amount + (increment * 2)), currentItem, currentUser) }}>
+          <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => { pushNewBid((maxBid.amount + (increment * 2)), currentItem, currentUser) }}>
             <Text style={styles.buttonsText}>Bid: ${maxBid.amount + (increment * 2)}</Text>
           </TouchableOpacity>
           <Text style={styles.buttonTags}>Increase Bid by +{(increment * 2)}</Text>
         </View>
 
         <View style={styles.buttonView}>
-          <TouchableOpacity style={styles.buttons} onPress={() => { pushNewBid((maxBid.amount + (increment * 4)), currentItem, currentUser) }}>
+          <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => { pushNewBid((maxBid.amount + (increment * 4)), currentItem, currentUser) }}>
             <Text style={styles.buttonsText}>Bid: ${maxBid.amount + (increment * 4)}</Text>
           </TouchableOpacity>
           <Text style={styles.buttonTags}>Increase Bid by +{(increment * 4)}</Text>
         </View>
         
         
-        <TouchableOpacity style={styles.buttons} onPress={() => { setRandomItem(setCurrentItem) }}>
+        <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => { setCustomBidDialog(true) }}>
           <Text style={styles.buttonsText}>Custom Bid</Text>
         </TouchableOpacity>  
 
@@ -223,13 +253,19 @@ const styles = StyleSheet.create({
     itemDescription: {fontSize: 15, color: '#676c75', textAlign: 'center', marginTop: 8},
     bidPrice: {fontSize: 45, fontWeight: "bold", textAlign: 'center'},
     bidTags: {fontSize: 20, color: '#7c838f', textAlign: 'center'},
+    highestBidderText: {fontSize: 20, color: '#38d67f', textAlign: 'center'},
 
-    buttons: { height: 50, backgroundColor: '#377be6', borderRadius:10 , padding: 10, marginTop: 10, width: '90%', alignSelf: 'center'},
+    buttons: { height: 50, backgroundColor: '#377be6', borderRadius:10 , padding: 10, marginTop: 5, width: '90%', alignSelf: 'center'},
     buttonsText: { color: '#fff', fontSize: 25, textAlign: "center", fontWeight: 'bold' },
-    buttonTags: {fontSize: 15, color: '#7c838f', textAlign: 'center', marginTop: 5},
+    buttonTags: {fontSize: 20, color: '#7c838f', textAlign: 'center', marginTop: 5},
     buttonView: { marginBottom: 5},
+    
   
-
+    helpIcon: {position: 'absolute', left: 20, top: 40, zIndex: 1, width: 35, height: 35},
+    helpCloseButton: { height: 40, backgroundColor: '#377be6', borderRadius:10 , padding: 8, marginTop: 10, width: '70%', alignSelf: 'center'},
+    helpSignoutButton: { height: 35, backgroundColor: '#FF9900', borderRadius:10 , padding: 8, marginTop: 100, marginBottom: 40, width: '70%', alignSelf: 'center'},
+    helpButtonText: { color: '#fff', fontSize: 20, textAlign: "center", fontWeight: 'bold' },
+    helpSignoutText: { color: '#fff', fontSize: 15, textAlign: "center", fontWeight: 'bold'  },
   });
   
 

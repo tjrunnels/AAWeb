@@ -1,0 +1,28 @@
+  
+  i changed the file /Users/tomrunnels/Documents/Development/aamobile/node_modules/aws-amplify-react-native/dist/Auth/SignIn.js
+  to make it say what i want.  This is a chunk of code that reflects my changes
+  the first line is line 100 and the bottom is line 120
+  
+//100  v
+   key: "showComponent",
+    value: function showComponent(theme) {
+      var _this3 = this;
+
+      return /*#__PURE__*/_react["default"].createElement(_AmplifyUI.Wrapper, null, /*#__PURE__*/_react["default"].createElement(_reactNative.View, {
+        style: theme.section
+      }, /*#__PURE__*/_react["default"].createElement(_reactNative.View, null, /*#__PURE__*/_react["default"].createElement(_AmplifyUI.Header, {
+        theme: theme,
+        testID: _AmplifyTestIDs["default"].AUTH.SIGN_IN_TO_YOUR_ACCOUNT_TEXT
+        //tomdo: i changed this here v
+      }, _awsAmplify.I18n.get('\nWelcome to the Hannah\'s Home Auction App. \n \nPlease Sign Up for an account,\nor Sign In to an account you have already made')), 
+      
+      /*#__PURE__*/_react["default"].createElement(_reactNative.View, {
+        style: theme.sectionBody
+      }, this.renderUsernameField(theme), /*#__PURE__*/_react["default"].createElement(_AmplifyUI.FormField, {
+        theme: theme,
+        onChangeText: function onChangeText(text) {
+          return _this3.setState({
+            password: text
+          });
+        },
+//120  ^

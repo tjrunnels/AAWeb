@@ -124,6 +124,7 @@ function App() {
         const itemSubscription = DataStore.observe(Item).subscribe(msg => {
           if (msg.opType == 'INSERT') {
             console.log("Just recieved new item:", msg.element.Title);
+            
             setCurrentItem(msg.element);
           }
         })
@@ -353,14 +354,19 @@ function App() {
                   >Inc {(increment * 1.5)}</Text>
               </View>
           <View style={styles.tomSquare}>
-                  <Text style = {styles.centerTextBoth}
-                    onPress={() => {addIncrement(increment * 0.5)}}
-                  >Inc {(increment * 0.5)}</Text>
+              <Text style = {styles.centerTextBoth}
+                onPress={() => {addIncrement(increment * 2)}}
+              >Inc {(increment * 2)}</Text>
               </View>
           <View style={styles.tomSquare}>
                   <Text style = {styles.centerTextBoth}
-                    onPress={() => {addIncrement(increment + 0.25)}}
-                  >Inc {(increment * 0.25)}</Text>
+                    onPress={() => {addIncrement(Math.ceil(increment * 0.25))}}
+                  >Inc {Math.ceil(increment * 0.25)}</Text>
+              </View>
+          <View style={styles.tomSquare}>
+                  <Text style = {styles.centerTextBoth}
+                    onPress={() => {addIncrement(Math.ceil(increment * 0.5))}}
+                  >Inc {Math.ceil(increment * 0.5)}</Text>
               </View>
           <View style={styles.tomSquare}>
               <Text style = {styles.centerTextBoth}
@@ -446,8 +452,16 @@ function App() {
 }
 
 
+//https://github.com/aws-amplify/amplify-js/blob/main/packages/aws-amplify-react-native/src/AmplifyTheme.ts
+//use that link to know what you can effect 
+
+//OR if you want to manually change stuff (like the "Sign in to your account" text) just edit the files manually
+// (like at file location: /Users/tomrunnels/Documents/Development/aamobile/node_modules/aws-amplify-react-native/dist/Auth/SignIn.js) 
+
+
+
 //tomdo: change
-export default ProjectorUI //withAuthenticator(BidUI, {includeGreetings: true});
+export default App // withAuthenticator(BidUI, {includeGreetings: false});
 
 
 

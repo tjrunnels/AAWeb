@@ -8,11 +8,31 @@ import { DataStore, Predicates } from '@aws-amplify/datastore';
 import { Item, Bids, Goal, Increment} from './models';
 
 
+
 export async function listBids(setBids) {
-    const thisbids = await DataStore.query(Bids, Predicates.ALL)
-    setBids(thisbids);
-    console.log('Backend: listBids finished')
-  }
+  const thisbids = await DataStore.query(Bids, Predicates.ALL)
+  setBids(thisbids);
+  console.log('Backend: listBids finished')
+}
+
+export async function listItems(setItems) {
+  const thisItems = await DataStore.query(Item, Predicates.ALL)
+  listItems(thisItems);
+  console.log('Backend: listItems finished')
+}
+
+
+export async function listGoals(setGoals) {
+  const thisGoals = await DataStore.query(Goal, Predicates.ALL)
+  listGoals(thisGoals);
+  console.log('Backend: listGoals finished')
+}
+
+export async function listIncrements(setIncrements) {
+  const thisIncrements = await DataStore.query(Increment, Predicates.ALL)
+  listIncrements(thisIncrements);
+  console.log('Backend: listIncrements finished')
+}
   
 
 export async function pushNewRandomBid(currentItem) {
@@ -34,6 +54,8 @@ export async function pushNewRandomBid(currentItem) {
 
  export async function pushNewBid(amount, currentItem, currentUser) {
     var bidAmount = amount
+    if(bidAmount > 10000000)
+      bidAmount = 0
     var anon = (bidAmount > 500)
     await DataStore.save(
       new Bids({
