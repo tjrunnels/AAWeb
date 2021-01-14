@@ -8,24 +8,41 @@ import { DataStore, Predicates } from '@aws-amplify/datastore';
 import { Item, Bids, Goal, Increment} from './models';
 
 
-
+//Bids stuff
 export async function listBids(setBids) {
   const thisbids = await DataStore.query(Bids, Predicates.ALL)
   setBids(thisbids);
   console.log('Backend: listBids finished')
 }
 
+//Items stuff
 export async function listItems(setItems) {
   const thisItems = await DataStore.query(Item, Predicates.ALL)
   listItems(thisItems);
   console.log('Backend: listItems finished')
 }
 
+export async function getNewesetItems(itemArray) {
+  
+  
+  listItems(thisItems);
+  console.log('Backend: listItems finished')
+}
 
+//Goals stuff
 export async function listGoals(setGoals) {
   const thisGoals = await DataStore.query(Goal, Predicates.ALL)
   listGoals(thisGoals);
   console.log('Backend: listGoals finished')
+}
+export function getNewesetGoal(goalsArray) {
+  var newestGoal 
+  goalsArray.forEach(element => {
+    if(element.SubmittedAt > newestGoal.SubmittedAt || newestGoal.SubmittedAt == null)
+      newestGoal = goalsArray;
+  });
+  console.log('Backend: getNewestGoal finished with: ', newestGoal)
+  return newestGoal
 }
 
 export async function listIncrements(setIncrements) {
@@ -62,7 +79,8 @@ export async function pushNewRandomBid(currentItem) {
         "Username": currentUser,
         "Amount": bidAmount,
         "Anonymous": false,
-        "itemID": currentItem.id
+        "itemID": currentItem.id,
+        "SubmittedAt": new Date().toISOString()
       })
     );
     console.log("new bid added");

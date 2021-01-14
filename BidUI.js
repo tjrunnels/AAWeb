@@ -8,7 +8,7 @@ import { Item, Bids, Goal, Increment} from './models';
 
 
 //from backend
-import { listBids, listItems, listGoals, listIncrements, evaluateAllBids, evaluateOneBid, pushNewBid, anonymousCheck, setRandomItem, addGoal, addIncrement} from './Backend'
+import { listBids, listItems, listGoals, getNewesetGoal, listIncrements, evaluateAllBids, evaluateOneBid, pushNewBid, anonymousCheck, setRandomItem, addGoal, addIncrement} from './Backend'
 
 //dialog box
 import DialogInput from 'react-native-dialog-input';
@@ -86,6 +86,7 @@ const BidUI = () => {
       });
       console.log('...done')
 
+
       //subscribe to Item
       const itemSubscription = DataStore.observe(Item).subscribe(msg => {
         if (msg.opType == 'INSERT') {
@@ -93,6 +94,7 @@ const BidUI = () => {
           setCurrentItem(msg.element);
         }
       })
+
 
       //subscribe to goal
       const goalSubscription = DataStore.observe(Goal).subscribe(msg => {
@@ -102,6 +104,8 @@ const BidUI = () => {
 
         }
       })
+
+
       //subscribe to Increment
       const incrementSubscription = DataStore.observe(Increment).subscribe(msg => {
           if (msg.opType == 'INSERT') {
@@ -115,6 +119,10 @@ const BidUI = () => {
       //get the user
       Auth.currentAuthenticatedUser().then(user => setCurrentUser(user.username));
       
+      // setTimeout(() => {
+      //   var newGoal = getNewesetGoal(goals)
+      //   setGoal(newGoal)
+      // }, 5000)
 
   }, [])
 
