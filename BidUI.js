@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState, Component } from 'react';
-import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Image} from 'react-native';
+import React, { useEffect, useState, useRef, Component } from 'react';
+import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Animated, Image} from 'react-native';
 
 //from admin UI
 import { DataStore, Predicates } from '@aws-amplify/datastore';
@@ -15,7 +15,7 @@ import DialogInput from 'react-native-dialog-input';
 
 
 
-import Amplify from 'aws-amplify'
+import Amplify, { button } from 'aws-amplify'
 import config from './aws-exports'
 Amplify.configure(config)
 
@@ -50,6 +50,17 @@ const BidUI = () => {
   const [helpOverlay, setHelpOverlay] = useState(false)
 
 
+  let cancelBarWidthAnimation = useRef(new Animated.Value(0));
+
+  const [showCancel0, setShowCancel0] = useState(false)
+    const [cancelWidth0, setCancelWidth0] = useState('0%')
+    const [buttonWidth0, setButtonWidth0] = useState('100%')
+  const [showCancel1, setShowCancel1] = useState(false)
+    const [cancelWidth1, setCancelWidth1] = useState('0%')
+    const [buttonWidth1, setButtonWidth1] = useState('100%')
+  const [showCancel2, setShowCancel2] = useState(false)
+    const [cancelWidth2, setCancelWidth2] = useState('0%')
+    const [buttonWidth2, setButtonWidth2] = useState('100%')
 
 
 
@@ -151,6 +162,48 @@ const BidUI = () => {
   }
 
 
+  function showConfirmButton () {
+
+    Animated.timing(cancelBarWidthAnimation.current, {
+      toValue: 80,
+      duration: 350
+      }).start();
+  }
+
+  function hideConfirmButton () {
+
+    Animated.timing(cancelBarWidthAnimation.current, {
+      toValue: 0,
+      duration: 350
+      }).start(); 
+  }
+
+  function handleBidButtonPress(incrementMultiplier) {
+    
+  }
+
+
+  let asdfasdf = cancelBarWidthAnimation.current.interpolate({
+    inputRange: [0, 100],
+    outputRange: ["0%", "100%"],
+    extrapolate: "clamp"
+})
+
+
+useEffect(() => {
+  showCancel0? setCancelWidth0('33%') : setCancelWidth0('0%')
+  showCancel0? setButtonWidth0('67%') : setButtonWidth0('100%')
+}, [showCancel0])
+
+useEffect(() => {
+  showCancel1? setCancelWidth1('33%') : setCancelWidth1('0%')
+  showCancel1? setButtonWidth1('67%') : setButtonWidth1('100%')
+}, [showCancel1])
+
+useEffect(() => {
+  showCancel2? setCancelWidth2('33%') : setCancelWidth2('0%')
+  showCancel2? setButtonWidth2('67%') : setButtonWidth2('100%')
+}, [showCancel2])
 
 
 
@@ -204,14 +257,90 @@ const BidUI = () => {
     {/* horizontal line */}
     <View style={{borderBottomColor: '#bcc2cc', borderBottomWidth: 1, margin: 10}}/>
 
+
+
+
+
+
+
     <View> 
-        <View style={[styles.buttonView, hightestBidderColorSwapStyle]}>
-          <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => { pushNewBid(((maxBid.amount) + increment), currentItem, currentUser) }}>
-            <Text style={styles.buttonsText}>Bid: ${maxBid.amount + increment}</Text>
-          </TouchableOpacity>
-          <Text style={styles.buttonTags}>Increase Bid by +{increment}</Text>
+        <View>
+          <View style={[styles.buttonView, {marginLeft: cancelWidth0, width: buttonWidth0, }]}>
+            <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => 
+            {  if(showCancel0) {
+                      pushNewBid(((maxBid.amount) + (increment * 1)), currentItem, currentUser) 
+                      setShowCancel0(false)
+                  } else {
+                    setShowCancel0(true)
+                    setShowCancel1(false)
+                    setShowCancel2(false)
+                  }
+             }}>
+              <Text style={styles.buttonsText}>{showCancel0? 'Confirm' : 'Bid'}: ${maxBid.amount + increment}{showCancel0? '?' : ''}</Text>
+            </TouchableOpacity>
+            <Text style={styles.buttonTags}>Increase Bid by +{increment}</Text>
+          </View>
+
+          <View style={[styles.buttonView, {width: cancelWidth0, position: 'absolute', left: 0, top: 0, }]}>
+            <TouchableOpacity style={[styles.buttons, {backgroundColor: '#d93f3f', padding: 0}]} onPress={() => {setShowCancel0(false) }}>
+                <Text style={[styles.buttonsText, {marginTop: 10}]}>Cancel</Text>
+            </TouchableOpacity>
+          </View>     
         </View>
 
+
+        <View>
+          <View style={[styles.buttonView, {marginLeft: cancelWidth1, width: buttonWidth1, }]}>
+            <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => 
+            { if(showCancel1) {
+                      pushNewBid(((maxBid.amount) + (increment * 2)), currentItem, currentUser) 
+                      setShowCancel1(false)
+                  } else {
+                      setShowCancel0(false)
+                      setShowCancel1(true)
+                      setShowCancel2(false)
+                  } }}>
+              <Text style={styles.buttonsText}>{showCancel1? 'Confirm' : 'Bid'}: ${maxBid.amount + (increment * 2)}{showCancel1? '?' : ''}</Text>
+            </TouchableOpacity>
+            <Text style={styles.buttonTags}>Increase Bid by +{(increment * 2)}</Text>
+          </View>
+
+          <View style={[styles.buttonView, {width: cancelWidth1, position: 'absolute', left: 0, top: 0, }]}>
+            <TouchableOpacity style={[styles.buttons, {backgroundColor: '#d93f3f', padding: 0}]} onPress={() => {setShowCancel1(false) }}>
+                <Text style={[styles.buttonsText, {marginTop: 10}]}>Cancel</Text>
+            </TouchableOpacity>
+          </View>     
+        </View>
+
+
+        <View>
+          <View style={[styles.buttonView, {marginLeft: cancelWidth2, width: buttonWidth2, }]}>
+            <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => 
+            { if(showCancel2) {
+                      pushNewBid(((maxBid.amount) + (increment * 4)), currentItem, currentUser) 
+                      setShowCancel2(false)
+                  } else {
+                    setShowCancel0(false)
+                    setShowCancel1(false)
+                    setShowCancel2(true)
+                  } }}>
+              <Text style={styles.buttonsText}>{showCancel2? 'Confirm' : 'Bid'}: ${maxBid.amount + (increment * 4)}{showCancel2? '?' : ''}</Text>
+            </TouchableOpacity>
+            <Text style={styles.buttonTags}>Increase Bid by +{(increment * 4)}</Text>
+          </View>
+
+          <View style={[styles.buttonView, {width: cancelWidth2, position: 'absolute', left: 0, top: 0, }]}>
+            <TouchableOpacity style={[styles.buttons, {backgroundColor: '#d93f3f', padding: 0}]} onPress={() => {setShowCancel2(false) }}>
+                <Text style={[styles.buttonsText, {marginTop: 10}]}>Cancel</Text>
+            </TouchableOpacity>
+          </View>     
+        </View>
+
+
+
+
+ 
+{/* 
         <View style={styles.buttonView}>
           <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => { pushNewBid((maxBid.amount + (increment * 2)), currentItem, currentUser) }}>
             <Text style={styles.buttonsText}>Bid: ${maxBid.amount + (increment * 2)}</Text>
@@ -225,9 +354,15 @@ const BidUI = () => {
           </TouchableOpacity>
           <Text style={styles.buttonTags}>Increase Bid by +{(increment * 4)}</Text>
         </View>
+         */}
         
-        
-        <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => { setCustomBidDialog(true) }}>
+        <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => 
+          { 
+            setCustomBidDialog(true) 
+            setShowCancel0(false)
+            setShowCancel1(false)
+            setShowCancel2(false)
+          }}>
           <Text style={styles.buttonsText}>Custom Bid</Text>
         </TouchableOpacity>  
 
@@ -255,10 +390,10 @@ const styles = StyleSheet.create({
     bidTags: {fontSize: 20, color: '#7c838f', textAlign: 'center'},
     highestBidderText: {fontSize: 20, color: '#38d67f', textAlign: 'center'},
 
-    buttons: { height: 50, backgroundColor: '#377be6', borderRadius:10 , padding: 10, marginTop: 5, width: '90%', alignSelf: 'center'},
+    buttons: { height: 50, backgroundColor: '#377be6', borderRadius:10 , padding: 10, marginTop: 5, width: '95%', alignSelf: 'center'},
     buttonsText: { color: '#fff', fontSize: 25, textAlign: "center", fontWeight: 'bold' },
     buttonTags: {fontSize: 20, color: '#7c838f', textAlign: 'center', marginTop: 5},
-    buttonView: { marginBottom: 5},
+    buttonView: { marginBottom: 5, width: '100%'},
     
   
     helpIcon: {position: 'absolute', left: 20, top: 40, zIndex: 1, width: 35, height: 35},
