@@ -21,6 +21,7 @@ Amplify.configure(config)
 
 import { Auth } from 'aws-amplify';
 import HelpUI from './HelpUI';
+import WaitUI from './waitUI';
 
 
 //inital state and basically declaration of maxBid variable
@@ -48,6 +49,7 @@ const BidUI = () => {
   const [goal, setGoal] = useState(100)
   const [customBidDialog, setCustomBidDialog] = useState(false)
   const [helpOverlay, setHelpOverlay] = useState(false)
+  const [waitOverlay, setWaitOverlay] = useState(true)
 
 
   let cancelBarWidthAnimation = useRef(new Animated.Value(0));
@@ -84,10 +86,15 @@ const BidUI = () => {
       //subscribe to Bids
       console.log('subscribing....')
       const bidSubscription = DataStore.observe(Bids).subscribe(msg => {
-        listBids(setBids)
+        
         //these are the only three opTypes: INSERT, UPDATE, and DELETE
         if (msg.opType == 'INSERT') {
+          listBids(setBids)
           console.log(msg.opType, "element:", msg.element);
+          setCustomBidDialog(false) 
+          setShowCancel0(false)
+          setShowCancel1(false)
+          setShowCancel2(false)
         }
         if (msg.opType == 'UPDATE')
           console.log("Updated: ", msg.element.id) //("Updated: ", msg.element.id, " to: ", msg.element);
@@ -102,6 +109,7 @@ const BidUI = () => {
         if (msg.opType == 'INSERT') {
           console.log("Just recieved new item:", msg.element.Title);
           setCurrentItem(msg.element);
+          setWaitOverlay(false)
         }
       })
 
@@ -226,12 +234,21 @@ useEffect(() => {
     </HelpUI>
     : null}
 
+    {waitOverlay ? 
+    <WaitUI>
+
+      <TouchableOpacity style={[styles.helpSignoutButton, {backgroundColor: '#eeeeee'}]} onPress={() => { setWaitOverlay(false) }}>
+            <Text style={[styles.helpSignoutText, {color: "#eeeeee"}]}>close</Text>
+      </TouchableOpacity>
+    </WaitUI>
+    : null}
+
 
 
     {/* Item info */}
         <View style={{height:150, marginBottom:30, backgroundColor: '#fff'}}>  
-            <Text style={styles.itemTitle}>{currentItem.Title}</Text>
-            <Text style={styles.itemDescription}>{currentItem.Description}</Text> 
+            <Text style={styles.itemTitle} onPress={() => {if(currentItem.Title == "Test Item") { setWaitOverlay(true) }}}>{currentItem.Title}</Text>
+            <Text style={styles.itemDescription}>{currentItem.Description.length > 186 ? currentItem.Description.substring(0,186) + '...' : currentItem.Description}</Text> 
         </View>
 
     <DialogInput isDialogVisible={customBidDialog}
