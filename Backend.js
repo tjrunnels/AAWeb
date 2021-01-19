@@ -172,7 +172,7 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
   //////////////////////////////////////////
  export  function anonymousCheck(element) {
     if(element.Anonymous) {
-      return 'Anonymous'
+      return "Anonymous"
     }
     else
       return element.Username

@@ -424,7 +424,7 @@ function App() {
 
 
 //tomdo: change
-export default App // withAuthenticator(BidUI, {includeGreetings: false});
+export default withAuthenticator(BidUI, {includeGreetings: false});
 
 
 

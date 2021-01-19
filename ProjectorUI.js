@@ -1,6 +1,5 @@
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef, useState }  from 'react';
-import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Animated, Image} from 'react-native';
+import { StyleSheet, Text, View, Animated, Image} from 'react-native';
 
 import InsetShadow from 'react-native-inset-shadow'
 
