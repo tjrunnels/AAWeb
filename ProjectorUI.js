@@ -161,7 +161,7 @@ const ProjectorUI = () => {
     //currentItem effect
     useEffect(() => {
         evaluateAllBids(currentItem, bids, setMaxBid)
-        //update goal?
+        
     }, [currentItem])
   
     //bids effect

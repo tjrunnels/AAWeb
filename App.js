@@ -59,20 +59,39 @@ const signUpConfig = {
 //-------------------------------------------------------------
 //------------------    ITEMS
 //-------------------------------------------------------------
+
+
 const KingsmillItem = new Item({
   "Title": "Kingmill Resort Stay",
   "Description": "When it comes to Kingsmill, we're not just another resort. We're like another world nestled into Williamsburg, Virginia—a top golf and spa destination. With our unparalleled range of accommodations, stunning James River setting, three must-play championship golf courses (one with exclusive access for The Club at Kingsmill members) and a boundless range of recreational activities and leisure pursuits—including tennis—right on the grounds, Kingsmill is a relaxing, fun, and memorable luxury waterfront escape. 3 days 2 night stay, unlimited golf, round trip airfare: $1500 Value ",
-  "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/kingsmill.jpg"],
+  "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/kingsmill.jpg",null,null],
   "ItemToBids": []
 })
 const KingsmillGoal = 1700;
 const KingsmillIncrement = 100;
 const Kingsmill = {
-  item: KingsmillItem,
-  goal: KingsmillGoal,
-  increment: KingsmillIncrement
+  "item": KingsmillItem,
+  "goal": KingsmillGoal,
+  "increment": KingsmillIncrement
 }
 
+
+function getNewKingsmillItem() {
+  const KingsmillItemLocal = new Item({
+    "Title": "Kingmill Resort Stay",
+    "Description": "When it comes to Kingsmill, we're not just another resort. We're like another world nestled into Williamsburg, Virginia—a top golf and spa destination. With our unparalleled range of accommodations, stunning James River setting, three must-play championship golf courses (one with exclusive access for The Club at Kingsmill members) and a boundless range of recreational activities and leisure pursuits—including tennis—right on the grounds, Kingsmill is a relaxing, fun, and memorable luxury waterfront escape. 3 days 2 night stay, unlimited golf, round trip airfare: $1500 Value ",
+    "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/kingsmill.jpg",null,null],
+    "ItemToBids": []
+  })
+  const KingsmillGoalLocal = 1700;
+  const KingsmillIncrementLocal = 100;
+  const KingsmillLocal = {
+    "item": KingsmillItemLocal,
+    "goal": KingsmillGoalLocal,
+    "increment": KingsmillIncrementLocal
+  }
+  return KingsmillLocal
+}
 
 
 
@@ -106,7 +125,7 @@ function App() {
     listBids(setBids) 
 
 
-        setItemData([Kingsmill,Kingsmill])
+        setItemData([getNewKingsmillItem,getNewKingsmillItem])
         console.log("useEffect for [] running... note: should happen just once")
         const bidSubscription = DataStore.observe(Bids).subscribe(msg => {
           listBids(setBids)
@@ -160,7 +179,7 @@ function App() {
     // }, [getItemData])
 
      //bids effect
-     useEffect(() => {
+    useEffect(() => {
       evaluateOneBid(bids[bids.length - 1], currentItem, maxBid,setMaxBid)
     }, [bids])
 
@@ -206,7 +225,7 @@ function App() {
         {/* <Text style= {styles.titleText}>{currentItem == null ? "" : currentItem.Title}</Text>
         <Text>{currentItem == null ? "" : currentItem.Description}</Text> */}
         {currentItem == null ? <View styles={{height: 0}}/> : <Image source={{uri: currentItem.Photos[0]}} style={{ width: 300, height: 100 }}/> }
-        <Text style={styles.smolBean}>Item: {currentItem == null ? "" : currentItem.Title.substring(0,20)},     MaxBid:{maxBid.amount},   Goal: {goal},    Increment: {increment}</Text>
+        <Text style={styles.smolBean}>Item: {currentItem == null ? "" : currentItem.Title.substring(0,20)},     MaxBid:{maxBid.amount}/{maxBid.user},   Goal: {goal},    Increment: {increment}</Text>
 
         {/* Item Tools */}
         <Text style={styles.rowTitle}>Item tools</Text>
@@ -224,7 +243,8 @@ function App() {
           </View>
                  
 
-          {getItemData.map((data, i) => {
+          {getItemData.map((afunction, i) => {
+            let data = afunction()
               return (
                 <View key={"item" + i} style={styles.tomSquare}>
                   <Text style = {styles.centerTextBoth}
