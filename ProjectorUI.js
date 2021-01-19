@@ -10,7 +10,6 @@ import {listBids, setRandomItem, evaluateOneBid, evaluateAllBids, addGoal, pushN
 //from amazon
 import { Item, Bids, Goal, Increment} from './models';
 import { DataStore } from '@aws-amplify/datastore';
-import { floor, set } from 'react-native-reanimated';
 
 
 
@@ -234,12 +233,7 @@ const ProjectorUI = () => {
         <View style={styles.container}>
             <Image source={popImage} style= {styles.popImage}/>
 
-{/* 
-            {bidderPopups.map((item,i) => {
-                <Animated.View style={[fadeContainer, item.popStyle]} id="i">
-                    <Text style={styles.fadeText}>{item.username}</Text>
-                </Animated.View>
-            })} */}
+
 
             {/* Item info */}
                 <View style={{height:160, marginBottom:0, backgroundColor: '#fff', width: 1000, alignSelf: 'center', marginBottom: 200, marginTop: 30}}>

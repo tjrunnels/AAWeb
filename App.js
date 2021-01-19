@@ -1,4 +1,3 @@
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, Component } from 'react';
 import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Image} from 'react-native';
 
@@ -14,7 +13,7 @@ import { Item, Bids, Goal, Increment} from './models';
 import DialogInput from 'react-native-dialog-input';
 
 
-import { withAuthenticator, S3Image } from 'aws-amplify-react-native'; 
+import { withAuthenticator } from 'aws-amplify-react-native'; 
 
 
 //backend functions
@@ -22,39 +21,6 @@ import {listBids, pushNewRandomBid, evaluateAllBids, evaluateOneBid, anonymousCh
          setRandomItem, printTopBidsFromAWS, deleteBids, addLakeHouseItem, addFirstPitchItem, addGoal, addIncrement, pushNewBid, addNewItem } from './Backend'
 
 
-const signUpConfig = {
-  hideAllDefaults: true,
-  signUpFields: [
-    {
-      label: 'Email',
-      key: 'email',
-      required: true,
-      displayOrder: 1,
-      type: 'string',
-    },
-    {
-      label: 'Name',
-      key: 'name',
-      required: true,
-      displayOrder: 3,
-      type: 'string',
-    },
-    {
-      label: 'Password',
-      key: 'password',
-      required: true,
-      displayOrder: 2,
-      type: 'password',
-    },
-    {
-      label: 'Username',
-      key: 'username',
-      required: true,
-      displayOrder: 4,
-      type: 'string',
-    },
-  ],
-}
 
 //-------------------------------------------------------------
 //------------------    ITEMS
@@ -97,12 +63,6 @@ function getNewKingsmillItem() {
 
 
 
-
-// async function listBids(setBids) {
-//   const thisbids = await DataStore.query(Bids, Predicates.ALL)
-//   setBids(thisbids);
-//   console.log('Backend: listBids finished')
-// }
 
 const initialState = { amount: 0, user: '' } 
 
@@ -197,23 +157,6 @@ function App() {
   }
 
 
-
-  function returnMaxBid(bids, id) {
-    var thisBids = bids.filter(function(element) {
-      return element.itemID == id
-    })
-    if(thisBids != null) {
-      console.log("comparing...")
-      thisBids.array.forEach(element => {
-        console.log(element.Amount, ' and')
-      });
-      console.log("max is ", Math.max(...thisBids))
-      return Math.max(...thisBids)
-    }
-    else {
-      return "no bids"
-    }
-  }
 
 
 
@@ -481,7 +424,7 @@ function App() {
 
 
 //tomdo: change
-export default withAuthenticator(BidUI, {includeGreetings: false});
+export default App // withAuthenticator(BidUI, {includeGreetings: false});
 
 
 

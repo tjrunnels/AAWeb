@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, useRef, Component } from 'react';
-import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Animated, Image} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Animated, Image} from 'react-native';
 
 //from admin UI
 import { DataStore, Predicates } from '@aws-amplify/datastore';
@@ -174,33 +174,6 @@ const BidUI = () => {
   }
 
 
-  function showConfirmButton () {
-
-    Animated.timing(cancelBarWidthAnimation.current, {
-      toValue: 80,
-      duration: 350
-      }).start();
-  }
-
-  function hideConfirmButton () {
-
-    Animated.timing(cancelBarWidthAnimation.current, {
-      toValue: 0,
-      duration: 350
-      }).start(); 
-  }
-
-  function handleBidButtonPress(incrementMultiplier) {
-    
-  }
-
-
-  let asdfasdf = cancelBarWidthAnimation.current.interpolate({
-    inputRange: [0, 100],
-    outputRange: ["0%", "100%"],
-    extrapolate: "clamp"
-})
-
 
 useEffect(() => {
   showCancel0? setCancelWidth0('33%') : setCancelWidth0('0%')
@@ -367,22 +340,6 @@ useEffect(() => {
 
 
 
- 
-{/* 
-        <View style={styles.buttonView}>
-          <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => { pushNewBid((maxBid.amount + (increment * 2)), currentItem, currentUser) }}>
-            <Text style={styles.buttonsText}>Bid: ${maxBid.amount + (increment * 2)}</Text>
-          </TouchableOpacity>
-          <Text style={styles.buttonTags}>Increase Bid by +{(increment * 2)}</Text>
-        </View>
-
-        <View style={styles.buttonView}>
-          <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => { pushNewBid((maxBid.amount + (increment * 4)), currentItem, currentUser) }}>
-            <Text style={styles.buttonsText}>Bid: ${maxBid.amount + (increment * 4)}</Text>
-          </TouchableOpacity>
-          <Text style={styles.buttonTags}>Increase Bid by +{(increment * 4)}</Text>
-        </View>
-         */}
         
         <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => 
           { 
