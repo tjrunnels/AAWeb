@@ -44,8 +44,8 @@ const Kingsmill = {
 
 function getNewKingsmillItem() {
   const KingsmillItemLocal = new Item({
-    "Title": "Kingmill Resort Stay",
-    "Description": "When it comes to Kingsmill, we're not just another resort. We're like another world nestled into Williamsburg, Virginia—a top golf and spa destination. With our unparalleled range of accommodations, stunning James River setting, three must-play championship golf courses (one with exclusive access for The Club at Kingsmill members) and a boundless range of recreational activities and leisure pursuits—including tennis—right on the grounds, Kingsmill is a relaxing, fun, and memorable luxury waterfront escape. 3 days 2 night stay, unlimited golf, round trip airfare: $1500 Value ",
+    "Title": "Kingmill Resort - Willamsburgh, VA",
+    "Description": "Williamsburg Virginia's only AAA Four Diamond Condominium Golf Resort\n3 days 2 night stay, unlimited golf, round trip airfare:  $1500 Value\n\nKingsmill resort is like another world nestled into Williamsburg, Virginia. With our unparalleled range of accommodations, stunning James River setting, three must-play championship golf courses and a boundless range of recreational activities right on the grounds, Kingsmill is a relaxing, fun, and memorable luxury waterfront escape",
     "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/kingsmill.jpg",null,null],
     "ItemToBids": []
   })
@@ -126,7 +126,7 @@ function App() {
 
     //currentItem effect
     useEffect(() => {
-      evaluateAllBids(currentItem, bids, setMaxBid)
+      evaluateAllBids(currentItem, bids, setMaxBid, "")
     }, [currentItem])
 
     // useEffect(() => {
@@ -140,7 +140,7 @@ function App() {
 
      //bids effect
     useEffect(() => {
-      evaluateOneBid(bids[bids.length - 1], currentItem, maxBid,setMaxBid)
+      evaluateOneBid(bids[bids.length - 1], currentItem, maxBid,setMaxBid, "")
     }, [bids])
 
     

@@ -21,6 +21,5 @@ target 'HannahsHomeAuctionApp' do
   #  post_install do |installer|
   #    flipper_post_install(installer)
   #  end
-  pod 'RNAWSCognito', :path => '../node_modules/amazon-cognito-identity-js'
 
 end

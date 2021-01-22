@@ -144,7 +144,7 @@ const BidUI = () => {
   //////////////////////////////////////////
   useEffect(() => {
     console.log('running useEffect for currentItem')
-    evaluateAllBids(currentItem, bids, setMaxBid)
+    evaluateAllBids(currentItem, bids, setMaxBid, currentUser)
     setGoalToNewest(setGoal)
     setIncrementToNewest(setIncrement)
 
@@ -159,7 +159,7 @@ const BidUI = () => {
   useEffect(() => {
     console.log('running useEffect for bids')
     if(bids.length > 0)
-      evaluateOneBid(bids[bids.length - 1], currentItem, maxBid, setMaxBid)
+      evaluateOneBid(bids[bids.length - 1], currentItem, maxBid, setMaxBid, currentUser)
   }, [bids])
 
 

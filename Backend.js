@@ -111,7 +111,7 @@ const initialState = { amount: 0, user: '' }
   //    and sets the 'maxBid' hook's .Amount property 
   //////////////////////////////////////////
 //tomdo:   does hardset bid need to be incoporated in evalueateALL ???
-export function evaluateAllBids(currentItem, bids, setMaxBid) {
+export function evaluateAllBids(currentItem, bids, setMaxBid, currentUser) {
     if(currentItem != null) {
       var id = currentItem.id
       var thisBids = bids
@@ -131,7 +131,7 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
         thisBids.forEach(element => {
           if(element.Amount > thisMaxBid) {
             thisMaxBid = element.Amount
-            thisMaxBidUsername = anonymousCheck(element)
+            thisMaxBidUsername = (currentUser == element.Username ? element.Username : anonymousCheck(element))
           }
           console.log(element.Amount, element.Amount.type,  ' and')
         });
@@ -152,10 +152,11 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
   //    sees if it is part of the 'currentItem',
   //    and updates the 'maxBid' if this new bid is higher (should bascially always be)
   //////////////////////////////////////////
- export  function evaluateOneBid(bid, currentItem, maxBid, setMaxBid) {
+ export  function evaluateOneBid(bid, currentItem, maxBid, setMaxBid, currentUser) {
     if(currentItem != null) {
       if(bid.itemID == currentItem.id && (bid.Amount > maxBid.amount || bid.Username == "HSForwardtech")) {
-        setMaxBid({amount: bid.Amount, user: anonymousCheck(bid)})
+        var thisMaxBidUsername = (currentUser == bid.Username ? bid.Username : anonymousCheck(bid))
+        setMaxBid({amount: bid.Amount, user: thisMaxBidUsername})
         //alert(anonymousCheck(bid), " just bid ", bid.Amount)
       }
     }
