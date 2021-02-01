@@ -92,7 +92,8 @@ export async function pushNewRandomBid(currentItem) {
         "Username": currentUser,
         "Amount": bidAmount,
         "Anonymous": anonymous,
-        "itemID": currentItem.id
+        "itemID": currentItem.id,
+        "SubmittedAt" : new Date().toISOString()
       })
     );
     console.log("new bid added");
@@ -128,10 +129,22 @@ export function evaluateAllBids(currentItem, bids, setMaxBid, currentUser) {
         
         var thisMaxBid = 0
         var thisMaxBidUsername = ""
+        var thisMaxBidSubmittedAt = "2016"
         thisBids.forEach(element => {
-          if(element.Amount > thisMaxBid) {
+          if(element.Amount == thisMaxBid) {
+            if((element.SubmittedAt < thisMaxBidSubmittedAt)) {   // < less than means older
+              // c:  same code as d
+              thisMaxBid = element.Amount
+              thisMaxBidUsername = (currentUser == element.Username ? element.Username : anonymousCheck(element))
+              thisMaxBidSubmittedAt = element.SubmittedAt
+            }
+          }
+
+          else if(element.Amount > thisMaxBid) {
+            // d:  same code as c
             thisMaxBid = element.Amount
             thisMaxBidUsername = (currentUser == element.Username ? element.Username : anonymousCheck(element))
+            thisMaxBidSubmittedAt = element.SubmittedAt
           }
           console.log(element.Amount, element.Amount.type,  ' and')
         });
@@ -154,10 +167,20 @@ export function evaluateAllBids(currentItem, bids, setMaxBid, currentUser) {
   //////////////////////////////////////////
  export  function evaluateOneBid(bid, currentItem, maxBid, setMaxBid, currentUser) {
     if(currentItem != null) {
-      if(bid.itemID == currentItem.id && (bid.Amount > maxBid.amount || bid.Username == "HSForwardtech")) {
-        var thisMaxBidUsername = (currentUser == bid.Username ? bid.Username : anonymousCheck(bid))
-        setMaxBid({amount: bid.Amount, user: thisMaxBidUsername})
-        //alert(anonymousCheck(bid), " just bid ", bid.Amount)
+      if(bid.itemID == currentItem.id) {
+        if(bid.Amount == maxBid.amount) {
+          if( (bid.SubmittedAt < maxBid.SubmittedAt)) {   // < less than means older
+            // a:  same code as b
+            var thisMaxBidUsername = (currentUser == bid.Username ? bid.Username : anonymousCheck(bid))
+            setMaxBid({amount: bid.Amount, user: thisMaxBidUsername, SubmittedAt: bid.SubmittedAt})
+          }
+        }
+      
+        else if(bid.Amount > maxBid.amount || bid.Username == "HSForwardtech") {       //then we need to replace with new maxbid)
+          // b:  same code as a
+          var thisMaxBidUsername = (currentUser == bid.Username ? bid.Username : anonymousCheck(bid))
+          setMaxBid({amount: bid.Amount, user: thisMaxBidUsername, SubmittedAt: bid.SubmittedAt})
+        }
       }
     }
     else {
