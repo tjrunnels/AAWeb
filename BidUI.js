@@ -24,7 +24,7 @@ import WaitUI from './waitUI';
 
 
 //inital state and basically declaration of maxBid variable
-const initialState = { amount: 0, user: '' }
+const initialState = { amount: 0, user: '', SubmittedAt: "2016"}
 
 
 //tomdo: delete.  for testing
@@ -251,7 +251,7 @@ useEffect(() => {
             {/* tomdo: delete addGoal and addIncrement */}
             <Text style={[styles.bidTags, hightestBidderColorSwapStyle]} onPress={() => {addIncrement(increment + 100)}}>{maxBid.user == currentUser? "You are the Highest Bidder" : "Highest Bid:"}</Text> 
             <Text style={[styles.bidPrice, hightestBidderColorSwapStyle]}>{maxBid.amount}</Text> 
-            <Text style={styles.bidTags} onPress={() => {addGoal(goal + 500)}}>Goal: ${goal}</Text> 
+            <Text style={styles.bidTags} onPress={() => {console.log(bids[2].SubmittedAt > bids[1].SubmittedAt)}}>Goal: ${goal}</Text> 
     </View>
 
     {/* horizontal line */}

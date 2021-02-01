@@ -2,7 +2,7 @@
   "expo": {
     "name": "Hannahs Home Auction App",
     "slug": "HHMobileApp",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -19,14 +19,15 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ForwardTech.HHMobileApp",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.0.3"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.ForwardTech.HHMobileApp"
+      "package": "com.ForwardTech.HHMobileApp",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
