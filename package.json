@@ -19,7 +19,7 @@
     "aws-amplify-react": "^4.2.18",
     "aws-amplify-react-native": "^4.3.0",
     "aws-appsync": "^4.0.2",
-    "expo": "~40.0.0",
+    "expo": "^40.0.1",
     "expo-cli": "^4.0.17",
     "expo-splash-screen": "~0.8.0",
     "expo-status-bar": "~1.0.3",
