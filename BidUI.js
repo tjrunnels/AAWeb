@@ -1,6 +1,5 @@
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, useRef, Component } from 'react';
-import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Animated, Image} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Animated, Image} from 'react-native';
 
 //from admin UI
 import { DataStore, Predicates } from '@aws-amplify/datastore';
@@ -8,7 +7,7 @@ import { Item, Bids, Goal, Increment} from './models';
 
 
 //from backend
-import { listBids, listItems, listGoals, listIncrements, evaluateAllBids, evaluateOneBid, pushNewBid, anonymousCheck, setRandomItem, addGoal, addIncrement} from './Backend'
+import { listBids, listItems, setGoalToNewest , listGoals, listIncrements, evaluateAllBids, evaluateOneBid, pushNewBid, anonymousCheck, setRandomItem, addGoal, addIncrement, setIncrementToNewest} from './Backend'
 
 //dialog box
 import DialogInput from 'react-native-dialog-input';
@@ -50,6 +49,7 @@ const BidUI = () => {
   const [customBidDialog, setCustomBidDialog] = useState(false)
   const [helpOverlay, setHelpOverlay] = useState(false)
   const [waitOverlay, setWaitOverlay] = useState(true)
+  const [anonSwitch, setAnonSwitch] = useState(false)
 
 
   let cancelBarWidthAnimation = useRef(new Animated.Value(0));
@@ -144,7 +144,10 @@ const BidUI = () => {
   //////////////////////////////////////////
   useEffect(() => {
     console.log('running useEffect for currentItem')
-    evaluateAllBids(currentItem, bids, setMaxBid)
+    evaluateAllBids(currentItem, bids, setMaxBid, currentUser)
+    setGoalToNewest(setGoal)
+    setIncrementToNewest(setIncrement)
+
   }, [currentItem])
 
 
@@ -156,7 +159,7 @@ const BidUI = () => {
   useEffect(() => {
     console.log('running useEffect for bids')
     if(bids.length > 0)
-      evaluateOneBid(bids[bids.length - 1], currentItem, maxBid, setMaxBid)
+      evaluateOneBid(bids[bids.length - 1], currentItem, maxBid, setMaxBid, currentUser)
   }, [bids])
 
 
@@ -169,33 +172,6 @@ const BidUI = () => {
     backgroundColor: maxBid.user == currentUser ? '#34c776' : '#377be6',
   }
 
-
-  function showConfirmButton () {
-
-    Animated.timing(cancelBarWidthAnimation.current, {
-      toValue: 80,
-      duration: 350
-      }).start();
-  }
-
-  function hideConfirmButton () {
-
-    Animated.timing(cancelBarWidthAnimation.current, {
-      toValue: 0,
-      duration: 350
-      }).start(); 
-  }
-
-  function handleBidButtonPress(incrementMultiplier) {
-    
-  }
-
-
-  let asdfasdf = cancelBarWidthAnimation.current.interpolate({
-    inputRange: [0, 100],
-    outputRange: ["0%", "100%"],
-    extrapolate: "clamp"
-})
 
 
 useEffect(() => {
@@ -219,6 +195,13 @@ useEffect(() => {
   return (
   <View style={styles.container}>
 
+
+    <TouchableOpacity style={styles.anonIcon}  onPress={() => {setAnonSwitch(!anonSwitch)}}>
+    <Text style={styles.anonText}>{anonSwitch ? "Anonymous" : " "}</Text>
+      {anonSwitch
+        ? <Image style={{width: 40, height: 40}} source={require('./anonOn.png')}></Image>
+        : <Image style={{width: 40, height: 40}} source={require('./anonOff.png')}></Image>}
+    </TouchableOpacity>
 
     <TouchableOpacity style={styles.helpIcon}  onPress={() => {setHelpOverlay(!helpOverlay)}}>
       <Image style={{width: 35, height: 35}} source={require('./helpIcon.png')}></Image>
@@ -244,12 +227,12 @@ useEffect(() => {
     : null}
 
 
-
+                          {/* tomdo: maybe change the width of Title or get rid of it altogether */}
     {/* Item info */}
-        <View style={{height:150, marginBottom:30, backgroundColor: '#fff'}}>  
-            <Text style={styles.itemTitle} onPress={() => {if(currentItem.Title == "Test Item") { setWaitOverlay(true) }}}>{currentItem.Title}</Text>
-            <Text style={styles.itemDescription}>{currentItem.Description.length > 186 ? currentItem.Description.substring(0,186) + '...' : currentItem.Description}</Text> 
-        </View>
+        <ScrollView style={{maxHeight:200, height:150, marginBottom:30, backgroundColor: '#fff', textAlign: 'center'}}>  
+            <Text style={[styles.itemTitle, {width: '90%', marginLeft: '5%'}]} onPress={() => {if(currentItem.Title == "Test Item") { setWaitOverlay(true) }}}>{currentItem.Title}</Text>
+            <Text style={styles.itemDescription}>{currentItem.Description.length > 18600 ? currentItem.Description.substring(0,186) + '...' : currentItem.Description}</Text> 
+        </ScrollView>
 
     <DialogInput isDialogVisible={customBidDialog}
         title={"Custom Bid Amount"}
@@ -257,7 +240,7 @@ useEffect(() => {
         hintInput = {(maxBid.amount + increment).toString()}
         textInputProps = {{autoCorrect: false, autoCapitalize: false, keyboardType: 'number-pad'}}
         submitInput={ (inputText) => {
-          pushNewBid(Number.parseInt(inputText), currentItem, currentUser)
+          pushNewBid(Number.parseInt(inputText), currentItem, currentUser, anonSwitch)
           setCustomBidDialog(false)
         } }
         closeDialog={ () => {setCustomBidDialog(false)}}>
@@ -285,7 +268,7 @@ useEffect(() => {
           <View style={[styles.buttonView, {marginLeft: cancelWidth0, width: buttonWidth0, }]}>
             <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => 
             {  if(showCancel0) {
-                      pushNewBid(((maxBid.amount) + (increment * 1)), currentItem, currentUser) 
+                      pushNewBid(((maxBid.amount) + (increment * 1)), currentItem, currentUser, anonSwitch) 
                       setShowCancel0(false)
                   } else {
                     setShowCancel0(true)
@@ -310,7 +293,7 @@ useEffect(() => {
           <View style={[styles.buttonView, {marginLeft: cancelWidth1, width: buttonWidth1, }]}>
             <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => 
             { if(showCancel1) {
-                      pushNewBid(((maxBid.amount) + (increment * 2)), currentItem, currentUser) 
+                      pushNewBid(((maxBid.amount) + (increment * 2)), currentItem, currentUser, anonSwitch) 
                       setShowCancel1(false)
                   } else {
                       setShowCancel0(false)
@@ -334,7 +317,7 @@ useEffect(() => {
           <View style={[styles.buttonView, {marginLeft: cancelWidth2, width: buttonWidth2, }]}>
             <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => 
             { if(showCancel2) {
-                      pushNewBid(((maxBid.amount) + (increment * 4)), currentItem, currentUser) 
+                      pushNewBid(((maxBid.amount) + (increment * 4)), currentItem, currentUser, anonSwitch) 
                       setShowCancel2(false)
                   } else {
                     setShowCancel0(false)
@@ -356,22 +339,6 @@ useEffect(() => {
 
 
 
- 
-{/* 
-        <View style={styles.buttonView}>
-          <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => { pushNewBid((maxBid.amount + (increment * 2)), currentItem, currentUser) }}>
-            <Text style={styles.buttonsText}>Bid: ${maxBid.amount + (increment * 2)}</Text>
-          </TouchableOpacity>
-          <Text style={styles.buttonTags}>Increase Bid by +{(increment * 2)}</Text>
-        </View>
-
-        <View style={styles.buttonView}>
-          <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => { pushNewBid((maxBid.amount + (increment * 4)), currentItem, currentUser) }}>
-            <Text style={styles.buttonsText}>Bid: ${maxBid.amount + (increment * 4)}</Text>
-          </TouchableOpacity>
-          <Text style={styles.buttonTags}>Increase Bid by +{(increment * 4)}</Text>
-        </View>
-         */}
         
         <TouchableOpacity style={[styles.buttons, hightestBidderBackgroundColorSwapStyle]} onPress={() => 
           { 
@@ -401,7 +368,7 @@ const styles = StyleSheet.create({
 
 
 
-    itemTitle: {fontSize: 35, fontWeight: "bold", textAlign: 'center'},
+    itemTitle: {fontSize: 35, fontWeight: "bold", textAlign: 'center', marginTop: 8},
     itemDescription: {fontSize: 15, color: '#676c75', textAlign: 'center', marginTop: 8},
     bidPrice: {fontSize: 45, fontWeight: "bold", textAlign: 'center'},
     bidTags: {fontSize: 20, color: '#7c838f', textAlign: 'center'},
@@ -412,179 +379,13 @@ const styles = StyleSheet.create({
     buttonTags: {fontSize: 20, color: '#7c838f', textAlign: 'center', marginTop: 5},
     buttonView: { marginBottom: 5, width: '100%'},
     
+    anonIcon: {position: 'absolute', right: 20, top: 30, alignItems: 'flex-end', zIndex: 1, height: 35,},
+    anonText: { fontWeight: 'bold', fontSize: 9, marginBottom: -3},
   
-    helpIcon: {position: 'absolute', left: 20, top: 40, zIndex: 1, width: 35, height: 35},
+    helpIcon: {position: 'absolute', left: 20, top: 45, zIndex: 1, width: 35, height: 35},
     helpCloseButton: { height: 40, backgroundColor: '#377be6', borderRadius:10 , padding: 8, marginTop: 10, width: '70%', alignSelf: 'center'},
     helpSignoutButton: { height: 35, backgroundColor: '#FF9900', borderRadius:10 , padding: 8, marginTop: 100, marginBottom: 40, width: '70%', alignSelf: 'center'},
     helpButtonText: { color: '#fff', fontSize: 20, textAlign: "center", fontWeight: 'bold' },
     helpSignoutText: { color: '#fff', fontSize: 15, textAlign: "center", fontWeight: 'bold'  },
   });
   
-
-
-
-
-
-
-
-
-
-// const BidScreen = () => {
-//   let [formState, setFormState] = useState(initialState);
-//   let [messages, setMessagesLocal] = useState([]);
-
-//   let [topBid, setTopBid] = useState(0);
-
-//   useEffect(() => {
-
-//     const client = new AWSAppSyncClient({
-//         url: awsconfig.aws_appsync_graphqlEndpoint,
-//         region: awsconfig.aws_appsync_region,
-//         auth: {
-//           type: AUTH_TYPE.API_KEY, // or type: awsconfig.aws_appsync_authenticationType,
-//           apiKey: awsconfig.aws_appsync_apiKey,
-//         }
-//       });
-
-
-//     console.log("useEffect for [] running... note: should happen just once")
-//     fetchmessages();
-//     const observable = client.subscribe({ query: gql(subscriptions.onCreateMessage)})
-//         .subscribe({      
-//         next: data => {
-//           console.log("subscription:next running...")
-//           fetchmessages();
-//         },
-//         error: error => {
-//           console.warn(error);
-//         }
-//       });
-//   }, [])
-
-//   //when messages changes
-//   useEffect(() => {
-//     console.log("useEffect for messages running...")
-//     try{
-//       console.log("messages length:", messages.length);
-
-//       //establish a local variable that can quickly change
-//       var localTopBid = topBid; 
-
-//       //if messages loaded correctly
-//       if(messages.length != 0){ 
-//         messages.forEach((item, index) => {
-//           console.log("evaluating bid: ", item.bid, typeof item.bid, ' > ', topBid, typeof topBid, '(technically...', localTopBid)
-//           //if the bid is not null, compare to max
-//           if(item.bid != null && item.bid > localTopBid){
-//             console.log("increaseing topBid to: ", item.bid)
-//             localTopBid = item.bid
-//           }
-//         }) ;
-//       }
-//       else
-//         localTopBid = 0;
-//       //after running through all messages, localTopBid should be the max 
-//       setTopBid(localTopBid);
-//     } catch (err){ console.log('error finding and setting top bid') }
-//   }, [messages]);
-
-//   function setInput(key, value) {
-//     setFormState({ ...formState, [key]: value })
-//   }
-
-//   async function fetchmessages() {
-//     try {
-//       const messageData = await API.graphql(graphqlOperation(queries.listMessages))
-//       const initial_messages = messageData.data.listMessages.items;
-//       setMessagesLocal(initial_messages); 
-      
-//     } catch (err) { console.log('error fetching messages') }
-//   }
-  
-
-//   async function addMessageClient() {
-//     try {
-//       const message = { ...formState }
-//       setMessagesLocal([...messages, message])
-//       setFormState(initialState)
-//       console.log("add: ",message);
-//       await API.graphql(graphqlOperation(mutations.createMessage, {input: message}))
-//     } catch (err) {
-//       console.log('error creating message:', err)
-//     }
-//   }
-
-//   async function addMessageClientC(_author, _body, _bid) {
-//     try {
-//       let message = {};
-//       message.bid = _bid == null? null :  _bid;
-//       message.author = _author == null? null : _author;
-//       message.body = _body == null? null : _body;
-
-//       setMessagesLocal([...messages, message])
-//       console.log("add: ",message);
-//       await API.graphql(graphqlOperation(mutations.createMessage, {input: message}))
-//     } catch (err) {
-//       console.log('error creating message (custom):', err)
-//     }
-//   }
-
-
-//   async function deleteMessages() {
-//     try {
-//       console.log("starting: deleteMEssages....")
-//       var i;
-//       for (i = messages.length - 1; i >= 0; i--)
-//       {
-//         let mID =  messages[i].id;
-//         await API.graphql(graphqlOperation(mutations.deleteMessage, {input: {id: mID}}))
-//       }
-//       console.log("worked i guesss....")
-//       fetchmessages();
-//     } catch (err) { console.log('error fetching messages') }
-//   }
-
-//   return (
-//   <View style={styles.container}>
-//     <View style={{height:300, marginBottom:20, backgroundColor: '#ddd'}}>
-//         <Text style={{fontSize: 40, fontWeight: "bold", textAlign: 'center'}}>Bid: {topBid}</Text>
-//         <Text style={{textAlign: 'center'}}>{messages.length}</Text>
-      
-//     </View>
-
-//     <View> 
-//         <View style={{flexDirection: "row"}}>
-//           <Text style={styles.preButtonsText}>Increase by 05:</Text>
-//           <TouchableOpacity style={styles.buttons} onPress={() => { addMessageClientC('tomSystem','*bid*',(topBid + 5)); }}>
-//             <Text style={styles.buttonsText}>Bid {topBid + 5}</Text>
-//           </TouchableOpacity>
-//         </View>
-//         <View style={{flexDirection: "row"}}>
-//           <Text style={styles.preButtonsText}>Increase by 10:</Text>
-//           <TouchableOpacity style={styles.buttons} onPress={() => { addMessageClientC('tomSystem','*bid*',(topBid + 10)); }}>
-//           <Text style={styles.buttonsText}>Bid {topBid + 10}</Text>
-//         </TouchableOpacity> 
-//         </View>
-//         <View style={{flexDirection: "row"}}>
-//           <Text style={styles.preButtonsText}>Increase by 20:</Text>
-//           <TouchableOpacity style={styles.buttons} onPress={() => { addMessageClientC('tomSystem','*bid*',(topBid + 20)); }}>
-//             <Text style={styles.buttonsText}>Bid {topBid + 20}</Text>
-//           </TouchableOpacity>  
-//         </View>
-        
-        
-//         <TouchableOpacity style={styles.buttons} onPress={() => { addMessageClientC('tomSystem','*bid*',(topBid + 69)); }}>
-//           <Text style={styles.buttonsText}>Custom:{'\t'}*not scripted yet*</Text>
-//         </TouchableOpacity>  
-
-//         <TouchableOpacity style={styles.buttons} onPress={() => { deleteMessages() }}>
-//           <Text style={styles.buttonsText}>Delete All (just for testing)</Text>
-//         </TouchableOpacity>    
-        
-//       </View>
-   
-//   </View>
-//   )
-  
-// };
-

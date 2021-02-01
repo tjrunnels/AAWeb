@@ -1,6 +1,5 @@
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef, useState }  from 'react';
-import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Animated, Image} from 'react-native';
+import { StyleSheet, Text, View, Animated, Image} from 'react-native';
 
 import InsetShadow from 'react-native-inset-shadow'
 
@@ -10,7 +9,6 @@ import {listBids, setRandomItem, evaluateOneBid, evaluateAllBids, addGoal, pushN
 //from amazon
 import { Item, Bids, Goal, Increment} from './models';
 import { DataStore } from '@aws-amplify/datastore';
-import { floor, set } from 'react-native-reanimated';
 
 
 
@@ -160,13 +158,13 @@ const ProjectorUI = () => {
 
     //currentItem effect
     useEffect(() => {
-        evaluateAllBids(currentItem, bids, setMaxBid)
-        //update goal?
+        evaluateAllBids(currentItem, bids, setMaxBid, "")
+        
     }, [currentItem])
   
     //bids effect
     useEffect(() => {
-        evaluateOneBid(bids[bids.length - 1], currentItem, maxBid,setMaxBid)
+        evaluateOneBid(bids[bids.length - 1], currentItem, maxBid,setMaxBid, "")
     }, [bids])
 
 
@@ -234,21 +232,15 @@ const ProjectorUI = () => {
         <View style={styles.container}>
             <Image source={popImage} style= {styles.popImage}/>
 
-{/* 
-            {bidderPopups.map((item,i) => {
-                <Animated.View style={[fadeContainer, item.popStyle]} id="i">
-                    <Text style={styles.fadeText}>{item.username}</Text>
-                </Animated.View>
-            })} */}
+
 
             {/* Item info */}
-                <View style={{height:160, marginBottom:0, backgroundColor: '#fff', width: 1000, alignSelf: 'center', marginBottom: 200, marginTop: 30}}>
-                    <Text style={styles.itemDescription}>Current Auction</Text> 
+                <View style={{height:200, marginBottom:0, backgroundColor: '#fff', width: 1000, alignSelf: 'center', marginBottom: 200, marginTop: 30}}>
+                    <Text style={styles.currentTags}>Current Auction</Text> 
                     <Text style={styles.itemTitle} onPress={() => {setRandomItem(setCurrentItem)}}>{currentItem.Title}</Text>
                     <Text style={styles.itemDescription} onPress={() => {pushNewBid(100,currentItem,'test');}}>{currentItem.Description}</Text> 
                 </View>
 
-                <Text style={[styles.itemDescription, {margin: -10}]} onPress={() => {;}}>Current Winner: {maxBid.user}</Text>
 
 
                 
@@ -276,9 +268,12 @@ const ProjectorUI = () => {
 
 
 
+            <View style={{flex: 1, flexDirection:'row', justifyContent: 'space-evenly', marginBottom: 80}}>
+                <Text style={[styles.goalText, {position: 'absolute', left:500}]} onPress={() => {addGoal(goal + 200); setOffPop(); console.log(springAnimation); showBidder('thomasrunnelssssss')}}>Goal: ${goal}</Text>           
+                <Text style={[styles.currentWinner, {position: 'absolute', left:1000, top: -5}]} onPress={() => {;}}>Current Winner: {maxBid.user}</Text>
 
+            </View>
             {/* Goal Text */}
-            <Text style={styles.goalText} onPress={() => {addGoal(goal + 200); setOffPop(); console.log(springAnimation); showBidder('thomasrunnelssssss')}}>Goal: ${goal}</Text>
 
 
             {/* Images */}
@@ -305,19 +300,22 @@ const styles = StyleSheet.create({
     messageBody: {fontSize: 16, color: '#fff',  borderRadius: 45, padding:8},
     bodyHolder: {borderRadius:10, backgroundColor: '#6b8bd6'},
     
+    currentTags:            { fontSize: 25, color: '#676c75', textAlign: 'center', margin: 7 },
+
 
     progressBar:           {  height:80, margin: 40},
     progressBarBackground: { height: '100%', width: '100%',  position: 'absolute', left: 0, top: 0, backgroundColor: '#c4c4c4', borderColor: '#000', borderWidth: 0, borderRadius: 60, alignSelf: 'center', flexDirection:"row" },
     progressBarForeground: { height: '100%', left: 0, top: 0, backgroundColor: '#377be6', borderTopLeftRadius: 40, borderBottomLeftRadius: 60 , justifyContent: 'center'},
     progressBarText:       {fontSize: 40, fontWeight: "bold", textAlign: 'center', color: '#ffffff', marginTop: 15},
     
-    goalText:              {fontSize: 50, fontWeight: "bold", textAlign: 'center', color: '#000000', marginTop: 0, marginBottom: 65},
+    currentWinner:         {fontSize: 40, fontWeight: "bold", textAlign: 'center', color: '#000000', marginTop: 0, marginBottom: 25},
+    goalText:              {fontSize: 50, fontWeight: "bold", textAlign: 'center', color: '#000000', marginTop: -10, marginBottom: 25},
 
     imageView:          { flexDirection: "row", justifyContent: "space-between" },  
     imageStyle:         { width: 610, height: 380 }, //627 × 385
 
     itemTitle:          { fontSize: 60, fontWeight: "bold", textAlign: 'center', marginBottom: 10},
-    itemDescription:    { fontSize: 30, color: '#676c75', textAlign: 'center', margin: 10 },
+    itemDescription:    { fontSize: 27, color: '#676c75', textAlign: 'center', margin: 10 },
     bidPrice:           { fontSize: 45, fontWeight: "bold", textAlign: 'center'},
     bidTags:            { fontSize: 20, color: '#7c838f', textAlign: 'center'},
 

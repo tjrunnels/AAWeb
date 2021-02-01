@@ -1,4 +1,3 @@
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, Component } from 'react';
 import { StyleSheet, Text, View, Form, Button, TextInput, ScrollView, TouchableOpacity, Image} from 'react-native';
 
@@ -14,7 +13,7 @@ import { Item, Bids, Goal, Increment} from './models';
 import DialogInput from 'react-native-dialog-input';
 
 
-import { withAuthenticator, S3Image } from 'aws-amplify-react-native'; 
+import { withAuthenticator } from 'aws-amplify-react-native'; 
 
 
 //backend functions
@@ -22,68 +21,48 @@ import {listBids, pushNewRandomBid, evaluateAllBids, evaluateOneBid, anonymousCh
          setRandomItem, printTopBidsFromAWS, deleteBids, addLakeHouseItem, addFirstPitchItem, addGoal, addIncrement, pushNewBid, addNewItem } from './Backend'
 
 
-const signUpConfig = {
-  hideAllDefaults: true,
-  signUpFields: [
-    {
-      label: 'Email',
-      key: 'email',
-      required: true,
-      displayOrder: 1,
-      type: 'string',
-    },
-    {
-      label: 'Name',
-      key: 'name',
-      required: true,
-      displayOrder: 3,
-      type: 'string',
-    },
-    {
-      label: 'Password',
-      key: 'password',
-      required: true,
-      displayOrder: 2,
-      type: 'password',
-    },
-    {
-      label: 'Username',
-      key: 'username',
-      required: true,
-      displayOrder: 4,
-      type: 'string',
-    },
-  ],
-}
 
 //-------------------------------------------------------------
 //------------------    ITEMS
 //-------------------------------------------------------------
+
+
 const KingsmillItem = new Item({
   "Title": "Kingmill Resort Stay",
   "Description": "When it comes to Kingsmill, we're not just another resort. We're like another world nestled into Williamsburg, Virginia—a top golf and spa destination. With our unparalleled range of accommodations, stunning James River setting, three must-play championship golf courses (one with exclusive access for The Club at Kingsmill members) and a boundless range of recreational activities and leisure pursuits—including tennis—right on the grounds, Kingsmill is a relaxing, fun, and memorable luxury waterfront escape. 3 days 2 night stay, unlimited golf, round trip airfare: $1500 Value ",
-  "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/kingsmill.jpg"],
+  "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/kingsmill.jpg",null,null],
   "ItemToBids": []
 })
 const KingsmillGoal = 1700;
 const KingsmillIncrement = 100;
 const Kingsmill = {
-  item: KingsmillItem,
-  goal: KingsmillGoal,
-  increment: KingsmillIncrement
+  "item": KingsmillItem,
+  "goal": KingsmillGoal,
+  "increment": KingsmillIncrement
+}
+
+
+function getNewKingsmillItem() {
+  const KingsmillItemLocal = new Item({
+    "Title": "Kingmill Resort - Willamsburgh, VA",
+    "Description": "Williamsburg Virginia's only AAA Four Diamond Condominium Golf Resort\n3 days 2 night stay, unlimited golf, round trip airfare:  $1500 Value\n\nKingsmill resort is like another world nestled into Williamsburg, Virginia. With our unparalleled range of accommodations, stunning James River setting, three must-play championship golf courses and a boundless range of recreational activities right on the grounds, Kingsmill is a relaxing, fun, and memorable luxury waterfront escape",
+    "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/kingsmill.jpg",null,null],
+    "ItemToBids": []
+  })
+  const KingsmillGoalLocal = 1700;
+  const KingsmillIncrementLocal = 100;
+  const KingsmillLocal = {
+    "item": KingsmillItemLocal,
+    "goal": KingsmillGoalLocal,
+    "increment": KingsmillIncrementLocal
+  }
+  return KingsmillLocal
 }
 
 
 
 
 
-
-
-// async function listBids(setBids) {
-//   const thisbids = await DataStore.query(Bids, Predicates.ALL)
-//   setBids(thisbids);
-//   console.log('Backend: listBids finished')
-// }
 
 const initialState = { amount: 0, user: '' } 
 
@@ -106,7 +85,7 @@ function App() {
     listBids(setBids) 
 
 
-        setItemData([Kingsmill,Kingsmill])
+        setItemData([getNewKingsmillItem,getNewKingsmillItem])
         console.log("useEffect for [] running... note: should happen just once")
         const bidSubscription = DataStore.observe(Bids).subscribe(msg => {
           listBids(setBids)
@@ -147,7 +126,7 @@ function App() {
 
     //currentItem effect
     useEffect(() => {
-      evaluateAllBids(currentItem, bids, setMaxBid)
+      evaluateAllBids(currentItem, bids, setMaxBid, "")
     }, [currentItem])
 
     // useEffect(() => {
@@ -160,8 +139,8 @@ function App() {
     // }, [getItemData])
 
      //bids effect
-     useEffect(() => {
-      evaluateOneBid(bids[bids.length - 1], currentItem, maxBid,setMaxBid)
+    useEffect(() => {
+      evaluateOneBid(bids[bids.length - 1], currentItem, maxBid,setMaxBid, "")
     }, [bids])
 
     
@@ -179,23 +158,6 @@ function App() {
 
 
 
-  function returnMaxBid(bids, id) {
-    var thisBids = bids.filter(function(element) {
-      return element.itemID == id
-    })
-    if(thisBids != null) {
-      console.log("comparing...")
-      thisBids.array.forEach(element => {
-        console.log(element.Amount, ' and')
-      });
-      console.log("max is ", Math.max(...thisBids))
-      return Math.max(...thisBids)
-    }
-    else {
-      return "no bids"
-    }
-  }
-
 
 
   return (
@@ -206,7 +168,7 @@ function App() {
         {/* <Text style= {styles.titleText}>{currentItem == null ? "" : currentItem.Title}</Text>
         <Text>{currentItem == null ? "" : currentItem.Description}</Text> */}
         {currentItem == null ? <View styles={{height: 0}}/> : <Image source={{uri: currentItem.Photos[0]}} style={{ width: 300, height: 100 }}/> }
-        <Text style={styles.smolBean}>Item: {currentItem == null ? "" : currentItem.Title.substring(0,20)},     MaxBid:{maxBid.amount},   Goal: {goal},    Increment: {increment}</Text>
+        <Text style={styles.smolBean}>Item: {currentItem == null ? "" : currentItem.Title.substring(0,20)},     MaxBid:{maxBid.amount}/{maxBid.user},   Goal: {goal},    Increment: {increment}</Text>
 
         {/* Item Tools */}
         <Text style={styles.rowTitle}>Item tools</Text>
@@ -224,7 +186,8 @@ function App() {
           </View>
                  
 
-          {getItemData.map((data, i) => {
+          {getItemData.map((afunction, i) => {
+            let data = afunction()
               return (
                 <View key={"item" + i} style={styles.tomSquare}>
                   <Text style = {styles.centerTextBoth}

@@ -22,16 +22,46 @@ export async function listItems(setItems) {
 }
 
 
-export async function listGoals(setGoals) {
+export async function listGoals() {
   const thisGoals = await DataStore.query(Goal, Predicates.ALL)
-  listGoals(thisGoals);
   console.log('Backend: listGoals finished')
+  return thisGoals 
 }
 
-export async function listIncrements(setIncrements) {
+export async function setGoalToNewest(setGoal) {
+  var allGoals = await listGoals()
+  if(allGoals.length == 0)
+    return new Goal({ "price" : 1})
+  let newestGoal = allGoals[0]
+  allGoals.forEach(element => {
+    if(element.SubmittedAt > newestGoal.SubmittedAt)
+        newestGoal = element
+  });
+  
+  console.log('Backend: newestGoal finished: ', newestGoal)
+
+  setGoal(newestGoal.price)
+}
+
+export async function listIncrements() {
   const thisIncrements = await DataStore.query(Increment, Predicates.ALL)
-  listIncrements(thisIncrements);
   console.log('Backend: listIncrements finished')
+  return thisIncrements
+}
+
+export async function setIncrementToNewest(setIncrement) {
+  var allIncrements = await listIncrements()
+  if(allIncrements.length == 0)
+    return new Increment({ "Amount" : 1})
+  let newestIncrement = allIncrements[0]
+  allIncrements.forEach(element => {
+    if(element.SubmittedAt > newestIncrement.SubmittedAt)
+        newestIncrement = element
+  });
+  
+  console.log('Backend: setIncrementToNewest finished: ', newestIncrement)
+
+  setIncrement(newestIncrement.Amount)
 }
   
 
@@ -52,16 +82,16 @@ export async function pushNewRandomBid(currentItem) {
 
 
 
- export async function pushNewBid(amount, currentItem, currentUser) {
+ export async function pushNewBid(amount, currentItem, currentUser, anonymous) {
     var bidAmount = amount
     if(bidAmount > 10000000)
       bidAmount = 0
-    var anon = (bidAmount > 500)
+
     await DataStore.save(
       new Bids({
         "Username": currentUser,
         "Amount": bidAmount,
-        "Anonymous": false,
+        "Anonymous": anonymous,
         "itemID": currentItem.id
       })
     );
@@ -81,7 +111,7 @@ const initialState = { amount: 0, user: '' }
   //    and sets the 'maxBid' hook's .Amount property 
   //////////////////////////////////////////
 //tomdo:   does hardset bid need to be incoporated in evalueateALL ???
-export function evaluateAllBids(currentItem, bids, setMaxBid) {
+export function evaluateAllBids(currentItem, bids, setMaxBid, currentUser) {
     if(currentItem != null) {
       var id = currentItem.id
       var thisBids = bids
@@ -101,7 +131,7 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
         thisBids.forEach(element => {
           if(element.Amount > thisMaxBid) {
             thisMaxBid = element.Amount
-            thisMaxBidUsername = anonymousCheck(element)
+            thisMaxBidUsername = (currentUser == element.Username ? element.Username : anonymousCheck(element))
           }
           console.log(element.Amount, element.Amount.type,  ' and')
         });
@@ -122,10 +152,11 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
   //    sees if it is part of the 'currentItem',
   //    and updates the 'maxBid' if this new bid is higher (should bascially always be)
   //////////////////////////////////////////
- export  function evaluateOneBid(bid, currentItem, maxBid, setMaxBid) {
+ export  function evaluateOneBid(bid, currentItem, maxBid, setMaxBid, currentUser) {
     if(currentItem != null) {
       if(bid.itemID == currentItem.id && (bid.Amount > maxBid.amount || bid.Username == "HSForwardtech")) {
-        setMaxBid({amount: bid.Amount, user: anonymousCheck(bid)})
+        var thisMaxBidUsername = (currentUser == bid.Username ? bid.Username : anonymousCheck(bid))
+        setMaxBid({amount: bid.Amount, user: thisMaxBidUsername})
         //alert(anonymousCheck(bid), " just bid ", bid.Amount)
       }
     }
@@ -142,7 +173,7 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
   //////////////////////////////////////////
  export  function anonymousCheck(element) {
     if(element.Anonymous) {
-      return 'Anonymous'
+      return "Anonymous"
     }
     else
       return element.Username
@@ -213,7 +244,7 @@ export function evaluateAllBids(currentItem, bids, setMaxBid) {
   }
 
   export async function addNewItem(thisItem) {
-    await DataStore.save(thisItem);
+    await DataStore.save(thisItem).then(console.log("saved: ", thisItem.Title))
     console.log("item added: ", thisItem.Title);
   }
 
