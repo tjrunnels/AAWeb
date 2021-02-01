@@ -166,7 +166,7 @@ export function evaluateAllBids(currentItem, bids, setMaxBid, currentUser) {
   //    and updates the 'maxBid' if this new bid is higher (should bascially always be)
   //////////////////////////////////////////
  export  function evaluateOneBid(bid, currentItem, maxBid, setMaxBid, currentUser) {
-    if(currentItem != null) {
+    if(currentItem != null && bid != null) {
       if(bid.itemID == currentItem.id) {
         if(bid.Amount == maxBid.amount) {
           if( (bid.SubmittedAt < maxBid.SubmittedAt)) {   // < less than means older
