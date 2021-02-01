@@ -186,7 +186,7 @@ export function evaluateAllBids(currentItem, bids, setMaxBid, currentUser) {
     else {
       console.log('no item')
     }
-    console.log("Backend: evalateOneBid finished for: ", bid.id)
+    console.log("Backend: evalateOneBid finished for: ", bid != null? bid.id : "")
   }
 
   //////////////////////////////////////////
