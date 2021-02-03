@@ -3,7 +3,7 @@
 
 const awsmobile = {
     "aws_project_region": "us-east-2",
-    "aws_appsync_graphqlEndpoint": process.env.AS_GQLENDPOINT,
+    "aws_appsync_graphqlEndpoint": "https://rmees7oeynhutocfo5lm6dwj6u.appsync-api.us-east-2.amazonaws.com/graphql",
     "aws_appsync_region": "us-east-2",
     "aws_appsync_authenticationType": "API_KEY",
     "aws_appsync_apiKey": process.env.AS_APIKEY,

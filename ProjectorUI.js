@@ -289,7 +289,7 @@ const ProjectorUI = () => {
 export default ProjectorUI
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 20, backgroundColor: "#ffffff" },
+    container: { flex: 1, padding: 20, backgroundColor: "#ffffff", width:1920, height:1080 },
 
     message: {  marginBottom: 15 },
     input: { height: 50, backgroundColor: '#ddd', marginBottom: 10, padding: 8 },
