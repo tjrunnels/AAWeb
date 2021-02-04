@@ -10,12 +10,14 @@ import {listBids, setRandomItem, evaluateOneBid, evaluateAllBids, addGoal, pushN
 import { Item, Bids, Goal, Increment} from './models';
 import { DataStore } from '@aws-amplify/datastore';
 
+import WaitUI from './waitUI'
+
 
 
 //tomdo: delete.  for testing
 var testItem = new Item({
     "Title": "Test Item",
-    "Description": "Ever wondered what the sunset looks like offshore?  Well you can find out with this exclusive boat excursion.  Just you, a guest, and the captain will sail out an hour before sunset and come back in 30 minutes after, drinks included.",
+    "Description": "Ever wondered what the sunset looks like offshore?  Well you can find out with this exclusive boat excursion.  Just you, a guest, and the captain will sail out an hour before sunset and come back in 30 minutes after.",
     "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/baseball.jpg"],
     "ItemToBids": []
   })
@@ -32,6 +34,7 @@ const ProjectorUI = () => {
     const [goal, setGoal] = useState(800)
     const [increment, setIncrement]  = useState(10)
     const [bidderPopups, setBidderPopups] = useState(initialPopUpState)
+    const [waitOverlay, setWaitOverlay] = useState(true)
 
 
     let [percent, setPercent] = useState(5);
@@ -128,7 +131,7 @@ const ProjectorUI = () => {
                 if (msg.opType == 'INSERT') {
                     console.log("Just recieved new item:", msg.element.Title);
                     setCurrentItem(msg.element);
-
+                    setWaitOverlay(false)
                 }
             })
             const goalSubscription = DataStore.observe(Goal).subscribe(msg => {
@@ -232,13 +235,20 @@ const ProjectorUI = () => {
         <View style={styles.container}>
             <Image source={popImage} style= {styles.popImage}/>
 
+            {waitOverlay ? 
+                <WaitUI>
 
+                <TouchableOpacity style={[styles.helpSignoutButton, {backgroundColor: '#eeeeee'}]} onPress={() => { setWaitOverlay(false) }}>
+                        <Text style={[styles.helpSignoutText, {color: "#eeeeee"}]}>close</Text>
+                </TouchableOpacity>
+                </WaitUI>
+            : null}
 
             {/* Item info */}
                 <View style={{height:200, marginBottom:0, backgroundColor: '#fff', width: 1000, alignSelf: 'center', marginBottom: 200, marginTop: 30}}>
                     <Text style={styles.currentTags}>Current Auction</Text> 
-                    <Text style={styles.itemTitle} onPress={() => {setRandomItem(setCurrentItem)}}>{currentItem.Title}</Text>
-                    <Text style={styles.itemDescription} onPress={() => {pushNewBid(100,currentItem,'test');}}>{currentItem.Description}</Text> 
+                    <Text style={styles.itemTitle} >{currentItem.Title}</Text>
+                    <Text style={styles.itemDescription}>{currentItem.Description}</Text> 
                 </View>
 
 
@@ -269,8 +279,8 @@ const ProjectorUI = () => {
 
 
             <View style={{flex: 1, flexDirection:'row', justifyContent: 'space-evenly', marginBottom: 80}}>
-                <Text style={[styles.goalText, {position: 'absolute', left:500}]} onPress={() => {addGoal(goal + 200); setOffPop(); console.log(springAnimation); showBidder('thomasrunnelssssss')}}>Goal: ${goal}</Text>           
-                <Text style={[styles.currentWinner, {position: 'absolute', left:1000, top: -5}]} onPress={() => {;}}>Current Winner: {maxBid.user}</Text>
+                <Text style={[styles.goalText, {position: 'absolute', left:500}]} >Goal: ${goal}</Text>           
+                <Text style={[styles.currentWinner, {position: 'absolute', left:1000, top: -5}]}>Current Winner: {maxBid.user}</Text>
 
             </View>
             {/* Goal Text */}
