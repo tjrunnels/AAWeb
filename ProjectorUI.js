@@ -17,7 +17,7 @@ import ProjectorWaitUI from './projectorWaitUI'
 var testItem = new Item({
     "Title": "Test Item",
     "Description": "Ever wondered what the sunset looks like offshore?  Well you can find out with this exclusive boat excursion.  Just you, a guest, and the captain will sail out an hour before sunset and come back in 30 minutes after, drinks included.",
-    "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/baseball.jpg"],
+    "Photos": [null,null,null],
     "ItemToBids": []
   })
   
