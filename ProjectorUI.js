@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState }  from 'react';
-import { StyleSheet, Text, View, Animated, Image} from 'react-native';
+import { StyleSheet, Text, View, Animated, Image, TouchableOpacity} from 'react-native';
 
 import InsetShadow from 'react-native-inset-shadow'
 
@@ -10,14 +10,13 @@ import {listBids, setRandomItem, evaluateOneBid, evaluateAllBids, addGoal, pushN
 import { Item, Bids, Goal, Increment} from './models';
 import { DataStore } from '@aws-amplify/datastore';
 
-import WaitUI from './waitUI'
-
+import ProjectorWaitUI from './projectorWaitUI'
 
 
 //tomdo: delete.  for testing
 var testItem = new Item({
     "Title": "Test Item",
-    "Description": "Ever wondered what the sunset looks like offshore?  Well you can find out with this exclusive boat excursion.  Just you, a guest, and the captain will sail out an hour before sunset and come back in 30 minutes after.",
+    "Description": "Ever wondered what the sunset looks like offshore?  Well you can find out with this exclusive boat excursion.  Just you, a guest, and the captain will sail out an hour before sunset and come back in 30 minutes after, drinks included.",
     "Photos": ["https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/baseball.jpg"],
     "ItemToBids": []
   })
@@ -35,7 +34,6 @@ const ProjectorUI = () => {
     const [increment, setIncrement]  = useState(10)
     const [bidderPopups, setBidderPopups] = useState(initialPopUpState)
     const [waitOverlay, setWaitOverlay] = useState(true)
-
 
     let [percent, setPercent] = useState(5);
     let pBarWidthAnimation = useRef(new Animated.Value(0));
@@ -138,7 +136,7 @@ const ProjectorUI = () => {
                 if (msg.opType == 'INSERT') {
                   console.log("Just recieved new goal:", msg.element.price);
                   setGoal(msg.element.price);
-  
+                        
                 }
             })
             const incrementSubscription = DataStore.observe(Increment).subscribe(msg => {
@@ -235,13 +233,21 @@ const ProjectorUI = () => {
         <View style={styles.container}>
             <Image source={popImage} style= {styles.popImage}/>
 
-       
+
+            {waitOverlay ? 
+                <ProjectorWaitUI>
+                    <TouchableOpacity style={[styles.helpSignoutButton, {backgroundColor: '#eeeeee'}]} onPress={() => { setWaitOverlay(false) }}>
+                            <Text style={[styles.helpSignoutText, {color: "#eeeeee"}]}>close</Text>
+                    </TouchableOpacity>
+                </ProjectorWaitUI>
+            : null}
+
 
             {/* Item info */}
                 <View style={{height:200, marginBottom:0, backgroundColor: '#fff', width: 1000, alignSelf: 'center', marginBottom: 200, marginTop: 30}}>
                     <Text style={styles.currentTags}>Current Auction</Text> 
-                    <Text style={styles.itemTitle} >{currentItem.Title}</Text>
-                    <Text style={styles.itemDescription}>{currentItem.Description}</Text> 
+                    <Text style={styles.itemTitle} onPress={() => {setRandomItem(setCurrentItem)}}>{currentItem.Title}</Text>
+                    <Text style={styles.itemDescription} onPress={() => {pushNewBid(100,currentItem,'test');}}>{currentItem.Description}</Text> 
                 </View>
 
 
@@ -272,8 +278,8 @@ const ProjectorUI = () => {
 
 
             <View style={{flex: 1, flexDirection:'row', justifyContent: 'space-evenly', marginBottom: 80}}>
-                <Text style={[styles.goalText, {position: 'absolute', left:500}]} >Goal: ${goal}</Text>           
-                <Text style={[styles.currentWinner, {position: 'absolute', left:1000, top: -5}]}>Current Winner: {maxBid.user}</Text>
+                <Text style={[styles.goalText, {position: 'absolute', left:500}]} onPress={() => {addGoal(goal + 200); setOffPop(); console.log(springAnimation); showBidder('thomasrunnelssssss')}}>Goal: ${goal}</Text>           
+                <Text style={[styles.currentWinner, {position: 'absolute', left:1000, top: -5}]} onPress={() => {;}}>Current Winner: {maxBid.user}</Text>
 
             </View>
             {/* Goal Text */}
@@ -282,8 +288,14 @@ const ProjectorUI = () => {
             {/* Images */}
             <View style={styles.imageView}>
                 <Image source={{uri: currentItem.Photos[0]}} style={styles.imageStyle}/> 
-                <Image source={{uri: "https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/logCabinImageDemo.jpeg"}} style={styles.imageStyle}/> 
-                <Image source={{uri: "https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/baseball.jpg"}} style={styles.imageStyle}/> 
+                {currentItem.Photos[1] != null
+                    ? <Image source={{uri: currentItem.Photos[1]}} style={styles.imageStyle}/> 
+                    : <Image source={{uri: "https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/BLANKwhite.png"}} style={styles.imageStyle}/> 
+                }
+                {currentItem.Photos[2] != null
+                    ? <Image source={{uri: currentItem.Photos[2]}} style={styles.imageStyle}/> 
+                    : <Image source={{uri: "https://hhaabucket150930-staging.s3.us-east-2.amazonaws.com/BLANKwhite.png"}} style={styles.imageStyle}/> 
+                }         
             </View>
         </View>
 
@@ -292,7 +304,7 @@ const ProjectorUI = () => {
 export default ProjectorUI
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 20, backgroundColor: "#ffffff", width:1920, height:1080 },
+    container: { flex: 1, padding: 20, backgroundColor: "#ffffff" },
 
     message: {  marginBottom: 15 },
     input: { height: 50, backgroundColor: '#ddd', marginBottom: 10, padding: 8 },
