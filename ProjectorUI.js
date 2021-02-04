@@ -235,14 +235,7 @@ const ProjectorUI = () => {
         <View style={styles.container}>
             <Image source={popImage} style= {styles.popImage}/>
 
-            {waitOverlay ? 
-                <WaitUI>
-
-                <TouchableOpacity style={[styles.helpSignoutButton, {backgroundColor: '#eeeeee'}]} onPress={() => { setWaitOverlay(false) }}>
-                        <Text style={[styles.helpSignoutText, {color: "#eeeeee"}]}>close</Text>
-                </TouchableOpacity>
-                </WaitUI>
-            : null}
+       
 
             {/* Item info */}
                 <View style={{height:200, marginBottom:0, backgroundColor: '#fff', width: 1000, alignSelf: 'center', marginBottom: 200, marginTop: 30}}>
