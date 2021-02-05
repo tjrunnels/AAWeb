@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     imageStyle:         { width: 610, height: 380 }, //627 × 385
 
     itemTitle:          { fontSize: 60, fontWeight: "bold", textAlign: 'center', marginBottom: 10},
-    itemDescription:    { fontSize: 27, color: '#676c75', textAlign: 'center', margin: 10 },
+    itemDescription:    { fontSize: 27, color: '#000000', textAlign: 'center', margin: 10 },
     bidPrice:           { fontSize: 45, fontWeight: "bold", textAlign: 'center'},
     bidTags:            { fontSize: 20, color: '#7c838f', textAlign: 'center'},
 
